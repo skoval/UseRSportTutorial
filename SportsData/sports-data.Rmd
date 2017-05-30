@@ -1,0 +1,325 @@
+---
+title: "Sports Analytics with R"
+subtitle: "2017 Melbourne Data Science Week"
+author: "Stephanie Kovalchik"
+date: ""
+output:
+  xaringan::moon_reader:
+    css: ["default", "talk.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE)
+library(htmlTable)
+```
+
+# About Me
+
+- ISEAL Research Fellow at Victoria University
+
+- Principal Data Scientist for Tennis Australia's Game Insight Group
+
+- Tennis Blog: [on-the-t.com](http://on-the-t.com)
+
+- @StatsOnTheT
+
+<div align="center">
+<img src="gig-logo.png" width=40%>
+</div>
+
+---
+
+# Tutorial Resources
+
+- Course package: [WOMBATsport](https://github.com/skoval/WOMBATsport)
+
+- Course tutorial: [WOMBATtutorial](https://github.com/skoval/WOMBATtutorial)
+
+- Contact: [s.a.kovalchik@gmail.com](s.a.kovalchik@gmail.com)
+
+---
+
+.hbox[
+### Sports Data and Packages: <br> The Numbers and Tools for Sports Analysis
+]
+
+---
+
+# Tutorial Outline
+
+- Sports data
+
+- Scraping sports data
+
+- Data wrangling
+
+- Exploratory data analysis
+
+- Predictive modelling
+
+- Blog publishing
+
+---
+
+
+class: slide-img
+
+# Popular Types of Sports Data
+
+--
+
+- Box Scores
+
+--
+
+- Performance Metrics
+
+--
+
+- Tracking Data
+
+--
+
+- Wearable Data
+
+---
+
+class: slide-img
+
+# Box Scores
+
+A 'box score' is a generic term for the summary statistics reported about a single sporting event.
+
+<div align="center">
+<img src="1876boxscore.jpg" width=70%>
+</div>
+
+.footnote[
+[1] Baseball box score from 1876.
+]
+
+---
+
+class: slide-img
+
+# Performance Metrics
+
+.left[
+- Player or team stats
+
+- Usually include multiple games
+
+- Longitudinal/time series
+]
+
+.right[
+![](tennis-performance-metrics.png)
+]
+
+---
+
+class: slide-img
+
+# Tracking Data
+
+'Tracking data' describes spatial temporal data of objects in a sporting event.
+
+<br>
+
+<div align="center">
+<img src="lebron.jpg" width=70%>
+</div>
+
+
+---
+
+class: slide-img
+
+# Wearables
+
+'Wearables' are technologies that collect data about athletes when worn. Biometrics and movement are two common types of data collected.
+
+<br>
+
+<div align="center">
+<img src="bigfooty.jpg" width=80%>
+</div>
+
+
+---
+
+class: slide-img
+
+# Resources: Multiple Sports
+
+  * [databaseSports](www.databaseSports.com)
+  
+  * [Open Source Sports](www.opensourcesports.com)
+  
+  * [ESPN Stats Info](http://www.espn.com.au/blog/statsinfo)
+  
+  * [Massey Ratings](http://www.masseyratings.com/data.php)
+
+---
+
+class: slide-img
+
+# Resources: American Football
+
+  - [BBALLsports.com](http://www.bballsports.com/)
+  - [College Football Statistics](http://www.cfbstats.com/blog/college-football-data/)
+  - [databaseFootball.com](http://www.databaseFootball.com/)
+  - [databaseFootball.com/College](http://www.databaseFootball.com/College)
+  - [NFL Statistics](http://www.nfl.com/stats/player)
+  - [Pro-football Reference](http://www.pro-football-reference.com)
+  - [Washingtonpost.com](http://stats.washingtonpost.com/cbk/teams.asp)
+  
+---
+
+class: slide-img
+
+# Resources: Baseball
+  
+.left[
+- [Baseball Almanac](http://www.baseball-almanac.com/teamstats/statmaster.php)
+- [Baseball America](http://www.baseballamerica.com/statistics/)
+- [Baseball Heat Maps](http://www.baseballheatmaps.com/graph/distanceleader.php)
+- [Baseball Musings](http://www.baseballmusings.com/cgi-bin/DayByDayDatabase.py)
+- [Baseball Prospectus](http://www.baseballprospectus.com/sortable/)
+- [Baseball-Reference.com](http://www.baseball-reference.com)
+- [BaseballGuru.com](http://baseballguru.com/battingdatabase.html)
+- [BBALLsports.com](http://www.bballsports.com/)
+- [databaseBaseball.com](http://www.databasebaseball.com)
+- [Doug Steele's MLB and NBA statistics](http://www.dougstats.com/)
+- [FanGraphs](http://www.fangraphs.com/)
+- [Home Run Tracker](http://www.hittrackeronline.com/index.php)
+- [John Skillton's Baseball Links](http://www.baseball-links.com/)
+- [Retrosheet](http://www.retrosheet.org)
+- [SABR: The Society for American Baseball Research](http://www.sabr.org/)
+]
+
+.right[
+- [Sean Lahman's Baseball Archive](http://www.seanlahman.com/baseball-archive/statistics/)
+- [StatCorner](http://www.statcorner.com/)
+- [The Baseball Cube](http://www.thebaseballcube.com/)
+]
+
+---
+
+class: slide-img
+
+# Resources: Basketball
+
+- [82games.com](http://www.82games.com/)
+- [APBR](http://www.apbr.org/)
+- [Basketball Reference](http://www.basketball-reference.com/)
+- [basketballvalue.com](http://www.basketballvalue.com/)
+- [BBALLsports.com](http://www.bballsports.com/)
+- [Currrent NBA Stats](http://www.nba.com/statistics/index.html)
+- [DatabaseBasketball](http://www.databasebasketball.com/)
+- [Doug Steele's MLB and NBA statistics](http://www.dougstats.com/)
+- [Final Four](http://www.finalfour.net/)
+- [Hoopdata.com](http://www.hoopdata.com/)
+- [Ken Pomeroy's college basketball site](http://www.kenpom.com/)
+- [NCAA Final Four](http://www.ncaa.org/)
+- [Washingtonpost.com](http://stats.washingtonpost.com/nba/)
+
+---
+
+class: slide-img
+
+# Resources: Hockey
+
+
+- [Puckalytics](https://puckalytics.com)
+- [BBALLsports.com](http://www.bballsports.com/)
+- [databaseHockey.com](http://www.databasehockey.com/)
+- [Hockey Analysis](http://stats.hockeyanalysis.com/)
+- [Hockey Reference](http://www.hockey-reference.com/)
+- [hockeyDB.com](http://www.hockeydb.com/)
+- [NHL Players' Association Statistics](http://www.nhlpa.com/stats/league-wide)
+- [NHL.com](http://www.nhl.com/ice/statshome.htm)
+- [QuantHockey.com](http://www.quanthockey.com/)
+- [Washingtonpost.com](http://stats.washingtonpost.com/nhl/teams.asp)
+
+---
+
+class: slide-img
+
+# Resources: Soccer
+
+- [football data](http://www.football-data.co.uk/)
+- [Football-Data.co.uk](http://www.football-data.co.uk/data.php)
+- [Soccerway](http://soccerway.com)
+- [squawka](http://www.squawka.com/)
+- [Statto.com](http://www.statto.com/football/stats)
+- [Transfermarkt](http://www.transfermarkt.com/)
+- [WhoScored.com](http://www.whoscored.com/)
+- [World Cup Soccer](http://www.worldcup.com/)
+
+---
+
+class: slide-img
+
+# Resources: Individual and Other Sports
+
+.left[
+- Cycling
+  - [Union Cycliste Internationale](http://www.uci.ch/)
+- Cricket
+  - [Cricinfo](http://www.espncricinfo.com/)
+  - [Cricketarchive.com](http://cricketarchive.com/Miscellaneous/statistics.html)  
+- Fencing
+  - [United States Fencing Association](http://www.usfa.org/)
+- Golf
+  - [databaseGolf.com](http://www.databasegolf.com/)
+- Tennis
+  - [ATP Tour](http://www.atpworldtour.com/)
+  - [WTA Tour](http://www.wtatennis.com/)
+  - [Tennis Abstract](http://www.tennisabstract.com/)
+]
+
+.right[
+- Olympics
+  - [databaseOlympics](http://www.databaseSports.com/olympics)
+  - [Official Olympics Site](http://www.olympic.org/uk/index_uk.asp)
+  - [Olympics at Sports-Reference.com](http://www.sports-reference.com/olympics/)
+- Rugby
+  - [Rugby Data](http://www.rugbydata.com/)
+- AFL
+  - [AFL Statistics](http://www.afl.com.au/stats)
+- Volleyball
+  - [Volleyball Worldwide](http://www.volleyball.org/)
+- Racing
+  - [databaseRacing.com](http://www.databaseracing.com/)
+  - [F1 Facts](http://f1-facts.com/stats)
+- Other
+  - [CrossFit Games](http://games.crossfit.com/leaderboard)
+  - [Massey Data](http://www.masseyratings.com/data.php)
+]
+
+---
+
+class: slide-img
+
+# Packages
+
+```{r results = 'asis', echo = FALSE}
+data <- data.frame(
+  Sport = c("General", "", "", "Soccer", "Baseball", "", "Tennis", "Cricket"),
+  Package = c("stattleshipR", "SportsAnalytics", "odds.converter",  "engsoccerdata", "pitchRx", "Lahman", "deuce", "cricketr!")
+)
+
+cols <- c( "#fff", "#fff", "#fff", "#eeeeee", "#fff", "#fff", "#eeeeee", "#fff")
+
+htmlTable(data, 
+          rnames = F, 
+          col.rgroup = cols,
+          css.cell = "width: 70%;text-align:center;")
+```

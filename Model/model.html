@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Modelling</title>
+    <meta charset="utf-8">
+    <link href="libs/remark-css/example.css" rel="stylesheet" />
+    <link rel="stylesheet" href="talk.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Modelling
+## Predictive Data Analysis in R
+
+---
+
+
+
+
+
+class: slide-img
+
+# Sport Prediction
+
+.cbox[
+### Predicting _who will win_ is the holy grail of sports analytics. 
+]
+
+--
+
+&lt;br&gt;
+
+- Much research in sports analytics focuses on building prediction models for performance outcomes
+
+- In this portion of the tutorial, we will get familiar with ways to build and evaluate prediction models in `R`
+
+---
+
+# Tutorial Prediction Objective
+
+.cbox[
+Tennis commentators and fans often look to match statistics to understand how a player won a match. But which stats are the most important for winning?
+]
+
+--
+
+&lt;br&gt;
+
+- In this tutorial, we will build a prediction model for a match win to help to answer this question.
+
+- As we learn about prediction modelling techniques, we will apply these ideas to the match statistics problem using the `diff_stats` dataset.
+
+---
+
+# Descriptive vs Predictive Models
+
+--
+
+*  _Predictive modeling_ usually refers to machine learning  
+
+--
+
+* The goal of these techniques is to improve predictive performance
+
+--
+
+* This is a very different goal from statistical models, like regression, where inference and interpretation are of primary importance
+
+--
+
+* Predictive models will often sacrifice interpretability for improved performance
+
+
+---
+
+# Describe Before You Predict
+
+* Because it is often a challenge to interpret the "how" of machine learning methods, it is good practice to first do some statistical modelling
+
+* The reasons for this include:
+
+  - Getting familiar with the interrelationships in your data 
+  
+  - Identifying any issues not flagged during EDA
+  
+  - Developing some expectations for the predictive modelling results
+
+
+---
+
+# Example: Statistical Modeling
+
+- Our goal for the tutorial is to understand the key drivers of wins among 12 differential statistics (the difference between one player and the opponent) for the previous 30 matches up to the current match
+
+- Out outcome is a *binary* variable named `winner`
+
+- Given this outcome, we will use `logistic regression` as our statistical model
+
+
+&lt;div align="center"&gt;
+&lt;img src="federer.jpg" width=50%&gt;
+&lt;/div&gt;
+
+
+
+---
+
+# Example: Logistic Regression
+
+
+```r
+library(WOMBATsport) # Load our tutorial package
+
+data(diff_stats)
+
+str(diff_stats) # Examine our variables
+```
+
+---
+
+# Example: Logistic Regression
+
+
+```
+## 'data.frame':	1502 obs. of  20 variables:
+##  $ matchid                 : chr  "2016-01-04:F:Milos Raonic:Roger Federer" "2016-01-04:F:Novak Djokovic:Rafael Nadal" "2016-01-04:F:Stanislas Wawrinka:Borna Coric" "2016-01-04:QF:Bernard Tomic:Kei Nishikori" ...
+##  $ tourney_name            : chr  "Brisbane" "Doha" "Chennai" "Brisbane" ...
+##  $ surface                 : chr  "Hard" "Hard" "Hard" "Hard" ...
+##  $ player1                 : chr  "Milos Raonic" "Novak Djokovic" "Borna Coric" "Kei Nishikori" ...
+##  $ player2                 : chr  "Roger Federer" "Rafael Nadal" "Stanislas Wawrinka" "Bernard Tomic" ...
+##  $ tourney_date            : Date, format: "2016-01-04" "2016-01-04" ...
+##  $ round                   : Factor w/ 8 levels "RR","R128","R64",..: 8 8 8 6 6 6 6 6 6 5 ...
+##  $ winner                  : num  1 1 0 0 0 0 0 0 0 1 ...
+##  $ diff_ace_rate           : num  0.05612 0.03264 -0.05181 -0.05622 0.00835 ...
+##  $ diff_df_rate            : num  0.00667 -0.00901 0.00242 0.01473 -0.00654 ...
+##  $ diff_first_serve_in_p   : num  -0.00745 -0.00283 0.03756 -0.04684 0.02079 ...
+##  $ diff_first_serve_won_p  : num  -0.0146 0.0209 -0.0535 0.019 0.0354 ...
+##  $ diff_second_serve_won_p : num  -0.0133 0.0701 -0.0753 0.0239 0.0841 ...
+##  $ diff_serve_won_p        : num  -0.0171 0.0341 -0.0528 0.0132 0.0554 ...
+##  $ diff_first_return_won_p : num  -0.1127 0.0787 -0.0312 0.0335 0.0222 ...
+##  $ diff_second_return_won_p: num  -0.041 0.0801 -0.0206 0.0352 0.0562 ...
+##  $ diff_return_won_p       : num  -0.0944 0.084 -0.0316 0.0284 0.0445 ...
+##  $ diff_total_won_p        : num  -0.0439 0.0545 -0.0404 0.0131 0.0488 ...
+##  $ diff_bp                 : num  -1.533 1.033 -0.2 0.533 0.433 ...
+##  $ diff_bp_opp             : num  -2.933 1.2 -0.467 2.1 0.5 ...
+```
+
+---
+
+# Example: Logistic Regression
+
+We use `R`'s model convention: `formula = outcome ~ x1 + x2 + ...` and `glm` to fit the logistic model.
+
+
+```r
+fit &lt;- glm(winner ~ .,
+           data = diff_stats %&gt;% 
+              select(winner, dplyr::contains("diff")),
+           family = binomial) # Family binomial for logistic
+
+summary(fit)
+```
+
+---
+
+# Example: Logistic Regression
+
+
+```
+## 
+## Call:
+## glm(formula = winner ~ ., family = binomial, data = diff_stats %&gt;% 
+##     select(winner, dplyr::contains("diff")))
+## 
+## Deviance Residuals: 
+##    Min      1Q  Median      3Q     Max  
+## -1.984  -1.033   0.433   1.015   2.282  
+## 
+## Coefficients:
+##                           Estimate Std. Error z value Pr(&gt;|z|)  
+## (Intercept)                0.03158    0.05665   0.557   0.5772  
+## diff_ace_rate             -1.54106    2.07474  -0.743   0.4576  
+## diff_df_rate              -4.69619    4.59496  -1.022   0.3068  
+## diff_first_serve_in_p     -2.36610    3.28732  -0.720   0.4717  
+## diff_first_serve_won_p    -6.69947   10.01545  -0.669   0.5036  
+## diff_second_serve_won_p   -8.04925    6.39177  -1.259   0.2079  
+## diff_serve_won_p          11.71168   18.21372   0.643   0.5202  
+## diff_first_return_won_p    7.98858    6.86072   1.164   0.2443  
+## diff_second_return_won_p   4.87107    4.80920   1.013   0.3111  
+## diff_return_won_p        -25.32574   13.02328  -1.945   0.0518 .
+## diff_total_won_p          44.46628   19.81612   2.244   0.0248 *
+## diff_bp                    0.27563    0.24807   1.111   0.2665  
+## diff_bp_opp                0.10394    0.08657   1.201   0.2299  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 2081.9  on 1501  degrees of freedom
+## Residual deviance: 1820.6  on 1489  degrees of freedom
+## AIC: 1846.6
+## 
+## Number of Fisher Scoring iterations: 3
+```
+
+---
+
+# Interpretation: Logistic Regression
+
+.cbox[
+### What do we learn from the logistic regression?
+]
+
+--
+
+&lt;br&gt;
+
+1. There are several strong effect sizes, including the differential in total points won, return points won, and second service points won. 
+
+2. There is a mix of positive and negative associations
+
+3. There are some large standard errors, which suggests strong correlation/colinearity among the features
+
+---
+
+# Predictive Modelling with `caret`
+
+--
+
+* The `caret` package, written by Max Kuhn, is a great resource for machine learning in `R`
+
+--
+
+* `caret` stand for Classification And REgression Training 
+
+--
+
+* It includes 100+ predictive modelling methods
+
+--
+
+* It provides a unified &amp; streamlines interface for building and evaluating models
+
+--
+
+* It allows parallel processing for faster computation
+
+--
+
+* You can install with `install.packages('caret')`
+
+---
+
+# Modelling Steps
+
+--
+
+Step 1. Decide how to spend your data
+
+--
+
+Step 2. Split the data into training and test
+
+--
+
+Step 3. Conduct pre-processing (as needed)
+
+--
+
+Step 4. Train the model
+
+--
+
+Step 5. Evaluate the model with test data
+
+---
+
+# Spending Data
+
+.cbox[
+_Spending data_ is the process of dividing data into training and test sets.
+]
+
+--
+
+&lt;br&gt;
+
+When going through this process, you need to decide:
+
+1. How much to devote to training?
+
+2. How you are going to divide the data?
+
+
+---
+
+# Why Split Up the Data at All?
+
+- Testing our data on independent samples is the strongest form of validation and evaluation
+
+- If we trained and tested on the same data, we risk _overfitting_ which is the machine-learning equivalent to a "Monday morning quarterback"
+
+![](armchair-quarterback.jpg)
+
+---
+
+# How and How Much to Spend?
+
+![](train_test.png)
+
+* How much to spend is a balance between training accuracy and testing precision
+
+* There is no hard and fast rule but allocation of 30% to testing is common practice
+
+---
+
+# How and How Much to Spend?
+
+* How we spend also concerns the _way_ we sample our test dataset
+
+* We could use random sampling but this could result in imbalanced datasets
+
+* It would be better to make sure the proportion of cases is preserved in each
+
+* Also, if there are any rare features, that should be accounted for in sampling as well
+
+* We can do this with the `caret` function `createDataPartition`
+
+---
+
+# Using `createDataPartition`
+
+Here is the syntax and main arguments for `createDataPartition`:
+
+
+```r
+createDataPartition(y, times, p, list, ...)
+```
+
+&lt;br&gt;
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Argument</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>y</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Outcome vector to balance sampling on</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>times</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Number of partitions</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>p</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Proportion of each partition allocated to training</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;'>list</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;'>Logical whether list is returned</td>
+</tr>
+</tbody>
+</table>
+
+
+---
+
+# Example: Partitioning Data
+
+In our development, we will create one partition with 70% of our dataset allocated to training.
+
+
+```r
+library(caret) # Load caret
+
+# Returns matrix of indices for obs in training
+train &lt;- createDataPartition(
+  y = diff_stats$winner,
+  times = 1,
+  p = 0.7,
+  list = F
+)
+
+diff_stats$train &lt;- 0
+diff_stats$train[train[,1]] &lt;- 1 # Indicator for training
+```
+
+---
+
+# Pre-Processing
+
+.cbox[
+Before we split our data, we need to pre-process our data. The pre-processing can protect against some loss in model accuracy due to scale, skew, or high correlation.
+]
+
+--
+
+&lt;br&gt;
+
+
+Common pre-processing steps are:
+
+1. Centering - Give all variables a common mean of 0
+
+2. Standardizing - Give all variables a common scale
+
+3. Remove highly correlated variables
+
+4. Reduce dimension (when `\(n \sim p\)`)
+
+---
+
+# Example: Pre-Processing
+
+For the `diff_stats` we will standardize and remove highly correlated variables as part of our pre-processing. First, we collect our features.
+
+
+```r
+features &lt;- grep("diff", names(diff_stats))
+```
+
+--
+
+Next, we use `scale` to center and standardize the scale of our features.
+
+
+```r
+diff_stats[,features] &lt;- scale(diff_stats[,features])
+```
+
+---
+
+# Example: Check for High-Correlation
+
+Next, we look for any variables with correlation `\(|r| &gt; .95\)`. This finds no cases meeting this criteria, so we retain all the features.
+
+
+```r
+correlation &lt;- cor(diff_stats[,features]) # Get correlation matrix
+
+correlation &lt;- abs(round(correlation, 2)) # Get absolute value, round
+
+# Check and exclude diagonal
+any(correlation &gt; .95 &amp; row(correlation) != col(correlation)) 
+```
+
+```
+## [1] FALSE
+```
+
+---
+
+# Preparing Outcome
+
+- The last pre-processing step is the preparation of our outcome variable.
+
+- For classification problems, where we have a categorical outcome, we want to create a factor as many of the `caret` models and functions expect this.
+
+- Here we transform `winner` into a factor.
+
+&lt;br&gt;
+
+
+```r
+diff_stats$winner &lt;- factor(diff_stats$winner, 
+                            labels = c("Loser", "Winner"))
+```
+
+---
+
+# Splitting Data
+
+Now we are ready to create our testing and training datasets.
+
+
+```r
+trainingData &lt;- diff_stats %&gt;%
+	dplyr::filter(train == 1) %&gt;%
+	select(winner, dplyr::contains("diff"))
+
+testData &lt;- diff_stats %&gt;%
+	dplyr::filter(train == 0) %&gt;%
+	select(winner, dplyr::contains("diff"))
+```
+
+---
+
+# The `train` Function
+
+The main workhouse function for model training in `caret` is `train`. Here are the main arguments you need to know to get started.
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Argument</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>form</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Formula (y ~ x)</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>data</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Data frame of training data</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>method</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Character of the ML method to be used</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>metric</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Performance metric for summarizing</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>tuneLength</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Sets granularity for tuning parameter if tuneGrid not specified</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>trControl</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Control parameters for training</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>tuneGrid</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>Data frame that gives explicit range for tuning parameters</td>
+</tr>
+</tbody>
+</table>
+
+---
+
+# Training Control
+
+* The `trControl` argument is a list that controls a number of aspects of training including resampling and how we summarise performance with each resample.
+
+* The resampling is an important additional measure to protect against overfitting when training 
+
+<br>
+
+&lt;div align="center"&gt;
+&lt;img src="resampling.png" width=60%&gt;
+&lt;/div&gt;
+
+
+---
+
+# Example: Using `trControl`
+
+In our example, we will use `trControl` to use 5-fold cross validation and a two-class summary for our performance measures.
+
+
+```r
+ctrlSpecs &lt;- trainControl(
+	method = "repeatedCV",
+	repeats = 5,
+	summaryFunction = twoClassSummary, # function from caret
+	classProbs = TRUE # Needed to use twoClassSummary
+)
+```
+
+
+---
+
+# Grid Tuning
+
+* The `tuneGrid` is a way to give a specific grid for the tuning parameters of the method
+
+* You can use `expand.grid` to make a range of parameters
+
+* To determine the parameters to tune and their variable names you can use `getModelInfo`
+
+---
+
+# Using `getModelInfo`
+
+* We can get a model of interest with `getModelInfo('model')` or get info from all models with `getModelInfo()`.
+
+* This returns a list per model with information about the model type, parameters, grid function, etc.
+
+* Here is an example with the `rpart` model.
+
+
+```r
+getModelInfo('rpart')[['rpart']][1:4]
+```
+
+---
+
+# Using `getModelInfo`
+
+
+```
+## $label
+## [1] "CART"
+## 
+## $library
+## [1] "rpart"
+## 
+## $type
+## [1] "Regression"     "Classification"
+## 
+## $parameters
+##   parameter   class                label
+## 1        cp numeric Complexity Parameter
+```
+
+---
+
+# Performance Metrics
+
+* We can use the `metric` argument to choose our performance metric for training evaluation
+
+* There are many metrics for evaluating classification. In general, it is best to choose one when choosing among model approaches
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Metric</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Accuracy</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Proportion of exactly correct classifications</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>AUC</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>Area under the ROC curve</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Sensitivity</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>The true positive rate (also called 'recall')</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>Specificity</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>The true negative rate</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; border-bottom: 2px solid grey; text-align: left;'>LogLoss</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; border-bottom: 2px solid grey; text-align: left;'>Prediction-weighted loss function</td>
+</tr>
+</tbody>
+</table>
+
+---
+
+# Setting Performance Metric
+
+There is no one correct performance measure. In fact, multiple should be evaluated when testing. For training, the "log loss" is good all around measure. Here is how we can set our control specs to use it.
+
+
+```r
+ctrlSpecs &lt;- trainControl(
+	method = "repeatedCV",
+	repeats = 5,
+	summaryFunction = mnLogLoss,
+	classProbs = TRUE
+)
+```
+
+---
+
+# Models
+
+There are many, many model options in `caret`. It won't be possible to look at them all here but we will consider examples from three major categories of model.
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Category</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Forest</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Ensemble of multiple decision trees with bagging (boostrap aggregation)</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>rf, rfRules, cforest</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Boosted</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Incremental building of multiple classifiers, which is a kind of correlated ensembling</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>gbm, adaboost, C5.0</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>Support Vector Machines</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>Collection of regression lines that try to maximally separate classes</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>svmLinear, svmRadial</td>
+</tr>
+</tbody>
+</table>
+
+---
+
+# Random Forest
+
+Let's have a look at each category and how we could train each in `caret`. Below we use the `rf` method to fit a random forest. The `tuneLength` is set to 10 to have a randomly generated grid for the forest parameters.
+
+
+```r
+set.seed(1115)
+
+rfFit &lt;- train(
+	winner ~ .,
+	data = trainingData,
+	method = "rf",
+	tuneLength = 10,
+	trControl = ctrlSpecs,
+	metric = "logLoss"
+)
+```
+
+---
+
+# Evaluate the Model
+
+* We can see the results across the different tuning parameters using: `print` or `plot`
+
+* The selected model can be extracted with `finalModel` and it will have all the class properties of the source method
+
+---
+
+# Example: Evaluate Models
+
+
+```r
+plot(rfFit) # Plot log-loss across grid parameters
+```
+
+![](model_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+
+---
+
+# Example: Evaluate Models
+
+
+```r
+library(randomForest) # Class methods for RF
+importance(rfFit$finalModel) # Variable importance
+```
+
+```
+##                          MeanDecreaseGini
+## diff_ace_rate                    41.61810
+## diff_df_rate                     39.41363
+## diff_first_serve_in_p            38.02068
+## diff_first_serve_won_p           42.55531
+## diff_second_serve_won_p          45.84984
+## diff_serve_won_p                 49.39158
+## diff_first_return_won_p          42.45264
+## diff_second_return_won_p         43.30347
+## diff_return_won_p                43.37305
+## diff_total_won_p                 59.12468
+## diff_bp                          39.29610
+## diff_bp_opp                      41.01112
+```
+
+---
+
+# Boosting: C5.0
+
+The `C5.0` algorithm is a variant of `adaboost`. Here we set up a tailor-made tuning grid for `C5.0` and then train the model.
+
+
+```r
+set.seed(1115)
+
+tuneGrid &lt;- expand.grid(
+	.model = "tree",
+	.trials = 1:100,
+	.winnow = FALSE
+)
+
+C5Fit &lt;- train(
+	winner ~ .,
+	data = trainingData,
+	method = "C5.0",
+	tuneGrid = tuneGrid,
+	trControl = ctrlSpecs,
+	metric = "logLoss"
+)
+```
+
+---
+
+# Results of C5.0
+
+
+```r
+plot(C5Fit)
+```
+
+![](model_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+---
+
+# Support Vector Machines
+
+The final method we consider is an SVM with a linear kernel. This is performed with method `svmLinear` and we setup a grid of 12 costs (the penalty for overlapping points).
+
+
+```r
+set.seed(1115)
+
+tuneGrid &lt;- expand.grid(
+	.C = 2^(-4:7)
+)
+
+svmFit &lt;- train(
+	winner ~ .,
+	data = trainingData,
+	method = "svmLinear",
+	tuneGrid = tuneGrid,
+	trControl = ctrlSpecs,
+	metric = "logLoss"
+)
+```
+
+---
+
+# Results: SVM
+
+
+```r
+plot(svmFit)
+```
+
+![](model_files/figure-html/unnamed-chunk-23-1.png)&lt;!-- --&gt;
+
+---
+
+# Comparing Resamples
+
+* By setting the seed to the same place with each model fit, we can use the `resamples` function to compare the performance of models in each sample directly
+
+
+```r
+resampledFit &lt;- resamples(
+  list(RF = rfFit, C50 = C5Fit, SVM = svmFit)
+  )
+```
+
+---
+
+# Comparing Resamples
+
+
+```r
+dotplot(resampledFit, metric = "logLoss")
+```
+
+![](model_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+
+---
+
+# Test Performance
+
+.cbox[
+### But what about performance in our test data?
+]
+
+&lt;br&gt;
+
+- We can use `predict` to get class predictions with our test data
+
+- An array of performance measures can be calculated with `confusionMatrix`
+
+---
+
+# Example: Test Performance
+
+
+```r
+predictions &lt;- predict(svmFit, testData) # automatically takes final model
+
+confusionMatrix(predictions, testData$winner)
+```
+
+---
+
+# Example: Test Performance
+
+
+```
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction Loser Winner
+##     Loser    146     63
+##     Winner    74    167
+##                                           
+##                Accuracy : 0.6956          
+##                  95% CI : (0.6507, 0.7378)
+##     No Information Rate : 0.5111          
+##     P-Value [Acc &gt; NIR] : 1.476e-15       
+##                                           
+##                   Kappa : 0.3901          
+##  Mcnemar's Test P-Value : 0.3929          
+##                                           
+##             Sensitivity : 0.6636          
+##             Specificity : 0.7261          
+##          Pos Pred Value : 0.6986          
+##          Neg Pred Value : 0.6929          
+##              Prevalence : 0.4889          
+##          Detection Rate : 0.3244          
+##    Detection Prevalence : 0.4644          
+##       Balanced Accuracy : 0.6949          
+##                                           
+##        'Positive' Class : Loser           
+## 
+```
+
+
+---
+
+# Interpreting Confusion Matrix
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Metric</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='width:40%; text-align: left;'>No Information Rate</td>
+<td style='width:40%; text-align: left;'>Largest proportion of observed (chance level)</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='width:40%; background-color: #f7f7f7; text-align: left;'>Kappa</td>
+<td style='width:40%; background-color: #f7f7f7; text-align: left;'>Agreement measure</td>
+</tr>
+<tr>
+<td style='width:40%; text-align: left;'>Pos Pred Value</td>
+<td style='width:40%; text-align: left;'>Chance of case given case was predicted</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='width:40%; background-color: #f7f7f7; text-align: left;'>Neg Pred Value</td>
+<td style='width:40%; background-color: #f7f7f7; text-align: left;'>Chance of not being case given case was not predicted</td>
+</tr>
+<tr>
+<td style='width:40%; text-align: left;'>Prevalence</td>
+<td style='width:40%; text-align: left;'>Prevalnce of true cases</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='width:40%; background-color: #f7f7f7; text-align: left;'>Detection Rate</td>
+<td style='width:40%; background-color: #f7f7f7; text-align: left;'>Prevalence of correctly predicted cases</td>
+</tr>
+<tr>
+<td style='width:40%; text-align: left;'>Detection Prevalence</td>
+<td style='width:40%; text-align: left;'>Prevalence of detected cases</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='width:40%; background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;'>Balanced Accuracy</td>
+<td style='width:40%; background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;'>Average of sensivity and specificity</td>
+</tr>
+</tbody>
+</table>
+
+---
+
+# Parallel Processing
+
+You might have noticed that running `train` can be slow.
+
+--
+
+* `caret` has built-in parallel processing
+
+* unix and OSX users can access this functionality by registering multiple cores with the `doMC` package
+
+---
+
+# Summary
+
+--
+
+* We've reviewed the major steps of developing and evaluating prediction models
+
+--
+
+* `caret` provides a comprehensive, systematic approach for carrying out these steps
+
+--
+
+* Application of several of these approaches to tennis match statistics suggest that rolling averages over past 30 matches can yield match predictions of at least 63%.
+
+* Further, we find the the total points won, total service points won, and second service points won were some of the most predictive stats of those considered
+
+---
+
+# Resources
+
+
+* [Web book on caret](http://topepo.github.io/caret/index.html)
+
+
+* [Applied Predictive Modeling](https://www.amazon.com/dp/1461468485?tag=inspiredalgor-20) 
+
+* [Introduction to Statistical Learning](https://www.amazon.com/dp/1461471397?tag=inspiredalgor-20)
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {window.dispatchEvent(new Event('resize'));});</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+  }
+});
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
