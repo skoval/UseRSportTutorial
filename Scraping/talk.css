@@ -1,0 +1,52 @@
+
+.title-slide {
+  background-image: url("tennis-australia-background.jpg");
+  background-size: cover;
+}
+
+.slide-img {
+  background-image: url("tennis-australia-background-2.jpg");
+  background-size: cover;
+}
+
+.left {
+  left:-8.33%;
+  text-align: left;
+  float: left;
+  width:50%;
+  z-index:-10;
+}
+
+.right {
+  left:31.25%;
+  top: 75px;
+  float: right;
+  text-align: left;
+  z-index:-10;
+  width:50%;
+}
+
+.cbox {
+  font-size: 24px;
+  text-align: center;
+  float: center;
+  width: 90%;
+  height: 25%;
+  padding: 1%;
+  margin-left: 10%;
+  border: 0px solid rgba(0, 0, 0, .2);
+  background: #f2ca95;
+}
+
+
+.hbox {
+  text-align: center;
+  float: center;
+  width: 90%;
+  height: 25%;
+  padding: 1%;
+  margin-left: 10%;
+  margin-top: 20%;
+  border: 0px solid rgba(0, 0, 0, .2);
+  background: #a3d9f5;
+}

@@ -1,0 +1,955 @@
+---
+title: "Exploring"
+subtitle: "Tools for Exploratory Data Analysis"
+author: ""
+date: ""
+output:
+  xaringan::moon_reader:
+    css: ["default", "talk.css"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r setup, include = FALSE}
+options(htmltools.dir.version = FALSE)
+
+library(stringr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(htmlTable)
+```
+
+class: slide-img
+
+# Data Exploration
+
+.hbox[
+_Exploratory data analysis is detective work-numerical detective work-or counting detective work-or graphical detective work...Exploratory data analysis can never be the whole story, but nothing else can serve as the foundation stone--as the first step._ - John Tukey
+]
+
+---
+
+# Steps in EDA
+
+--
+
+- Asking Questions
+
+--
+
+- Counting
+
+--
+
+- Describing
+
+--
+
+- Charting
+
+--
+
+- Formulate Hunches
+
+---
+
+# Asking Questions
+
+.left[
+- All exploration needs some direction
+
+- Exploring aimlessly wastes time and rarely will get you where you need to be
+
+- To avoid aimless exploration, you need to ask yourself what you are looking for? and what would be interesting to find?
+]
+
+.right[
+![](successcompass.jpg)
+]
+
+---
+
+# Know Your Variables
+
+.cbox[
+But you can only begin to ask questions when you have a good grasp of what information you have to explore and all the possible directions you could go.
+]
+
+---
+
+# Know Your Variables
+
+Some useful functions for getting to know the variables in your dataset are:
+
+<br>
+
+```{r echo = FALSE}
+data <- data.frame(
+  "Function" = c("dim", "str", "summary", "table"),
+  "Description" = c(
+    "Count of rows and columns",
+    "Summarizes the structure of each variable",
+    "Statistical summary of each variable",
+    "Tabulate all unique values in a variable"
+  )
+)
+
+
+htmlTable(data, 
+          rnames = F, 
+          col.rgroup = c("none", "#F7F7F7"),
+          align = c("ll"),
+          css.cell = "padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%;"
+          )
+```
+
+---
+
+# Example: Knowing Your Variables
+
+Explore the dataset provided in the `atp_matches` file, with cleaned versions of the 2016 match data. 
+
+1. Determine the rows and columns of the dataset
+
+2. Evaluate the structure of the data and types of each variable
+
+3. Identify some questions we could explore with these data?
+
+---
+
+# Example: Knowing Your Variables
+
+
+```{r}
+library(WOMBATsport)
+
+data(atp_matches)
+	
+dim(atp_matches) # Rows and variables
+```
+
+---
+
+# Example: Knowing Your Variables
+
+```{r}
+str(atp_matches) # Examine structure
+```
+
+
+---
+
+# Some Questions We Could Explore
+
+Here are a sample of the questions that the `atp_matches` would allow us to explore:
+
+--
+
+1. What are the number of events in the ATP season?
+
+--
+
+2. How many matches and events do ATP players play in a year?
+
+--
+
+3. What is the usual duration of an ATP match?
+
+--
+
+4. What is the typical percentage of service points won? 
+
+--
+
+5. How does the the distribution of service points differ between winners and losers of matches?
+
+---
+
+# Useful Tools for Counting
+
+- Several of the questions we are interested in involve the occurrences, which are simply the count of things.
+
+- Some useful `dplyr` counting functions are shown below.
+
+
+```{r echo = FALSE}
+data <- data.frame(
+  "Function" = c("n", "count", "n_distinct"),
+  "Description" = c(
+    "Count elements of a variable",
+    "Count the unique instances of each value of a variable",
+    "Count the unique values of a variable"
+  )
+)
+
+
+htmlTable(data, 
+          rnames = F, 
+          col.rgroup = c("none", "#F7F7F7"),
+          align = c("ll"),
+          css.cell = "padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%;"
+          )
+```
+
+---
+
+# Example: Counting
+
+* One of the questions we want to explore with the `atp_matches` is the number of events in the 2016 season. 
+
+* This is the same as asking for the unique tournaments in the dataset. 
+
+* We can do this with `n_distinct`
+
+```{r}
+atp_matches %>%
+  dplyr::summarise(
+    events = n_distinct(tourney_name)
+  )
+```
+
+---
+
+# Practice: Counting
+
+How many different players won at least one match in the 2016 season?
+
+--
+
+_Answer:_
+
+```{r}
+atp_matches %>%
+  dplyr::summarise(
+    winners = n_distinct(winner_name)
+  )
+```
+
+---
+
+# Example: Summarizing Counts
+
+* Another question we were interested in was the number of matches played by ATP players in a given year. 
+
+* In this case, we want a count per player so we need to use `group_by`.
+
+* But we also need to reshape our data, which currently has winner and loser by column, and make one `player` variable.
+
+--
+
+```{r}
+# Stringing reshape and summary steps together
+match_summary <- atp_matches %>%
+    tidyr::gather("result", "player", winner_name, loser_name) %>%
+    group_by(player) %>%
+    dplyr::summarise(
+      matches = n()
+    )
+
+summary(match_summary$matches)
+```
+
+---
+
+# Practice: Events Players
+
+Modify the code we just used to determine matches played, to find _tournaments_ played per player. What is the median for 2016?
+
+--
+
+*Answer:*
+
+```{r}
+event_summary <- atp_matches %>%
+    tidyr::gather("result", "player", winner_name, loser_name) %>%
+    group_by(player) %>%
+    dplyr::summarise(
+      events = n_distinct(tourney_name)
+    )
+
+summary(event_summary$matches)
+```
+
+---
+
+# Describing
+
+* When exploring, we also will want to apply statistical summaries that are often tailor-made to the variable of interest.
+
+* Consider the `minutes` variable which as the match duration in minutes. 
+
+* We can string together multiple summaries with the `summarise` function in `dplyr`.
+
+--
+
+```{r}
+minutes_summary <- atp_matches %>%
+    dplyr::summarise(
+      n.missing = sum(is.na(minutes)),
+      min = min(minutes, na.rm = T),
+      avg = mean(minutes, na.rm = T),
+      sd = sd(minutes, na.rm = T)
+    )
+```
+
+---
+
+# Summarising Multiple Columns
+
+It is easy to apply a standard set of summaries to a group of columns using `summarise_each`. Here are some standards you will want to include in a general statistical summary:
+
+1. Count of missing variables
+
+2. Measure of central tendency ("what is typical")
+
+3. Measure of variance (sd, var, IQR, etc.)
+
+
+---
+
+# Summarising Multiple Columns
+
+If we want to apply a summary to all numerical variables we can use `select` and `summarise_each` together. Below we select all variables from `minutes` to `l_svpt` using the range operator `:`.
+
+```{r}
+atp_matches %>%
+	dplyr::select(minutes:l_svpt)	%>%
+	dplyr::summarise_each(
+		funs(
+			missing = sum(is.na(.)),
+			mean = mean,
+			median = median,
+			sd = sd
+			)
+	)
+```
+
+---
+
+# Advanced Select 
+
+Note we could have achieved the same using the `contains` function. Here is the equivalent summary code:
+
+```{r}
+atp_matches %>%
+	dplyr::select(minutes, contains("w_"), contains("l_"))	%>%
+	dplyr::summarise_each(
+		funs(
+			missing = sum(is.na(.)),
+			mean = mean,
+			median = median,
+			sd = sd
+			)
+	)
+```
+
+---
+
+# Anonymous Functions
+
+- What was a problem with the results in the previous summaries? 
+
+- We have missing values but out functions include missing values by default.
+
+- We can fix this using anonymous functions call, where we pass a variable with the `.` syntax.
+
+```{r}
+atp_matches %>%
+	dplyr::select(minutes:l_svpt)	%>%
+	dplyr::summarise_each(
+		funs(
+			missing = sum(is.na(.)),
+			mean = mean(., na.rm = T),
+			median = median(., na.rm = T),
+			sd = sd(., na.rm = T)
+			)
+	)
+```
+
+---
+
+# Charting
+
+--
+
+* Most of our describing and exploration in `R` happens with graphics
+
+--
+
+* A powerful package for graphing is `ggplot2`
+
+--
+
+* `ggplot2` provides a grammar for building univariate, bivariate, and lattice plots
+
+--
+
+* Also, many specialty graphics packages build on `ggplot2`
+
+---
+
+# Overview of `ggplot2`
+
+To install, use `install.packages('ggplot2')`.
+
+```{r echo = FALSE}
+data <- data.frame(
+  "Function Type" = c("aes", "geoms", "facet", "scales", "themes"),
+  "Description" = c(
+    "Relates variables to axes and aesthetic elements of our plot",
+    "Define how the variables will be displayed, that is, the type of chart",
+    "Splits plot into rows and columns defined by a group variable",
+    "Customizes the range and limits of aesthetics",
+    "Further controls of the style and elements of the chart"
+  )
+)
+
+
+htmlTable(data, 
+          rnames = F, 
+          col.rgroup = c("none", "#F7F7F7"),
+          align = c("ll"),
+          css.cell = "padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%;"
+          )
+```
+
+---
+
+# Charting One Continuous Variable
+
+We could also describe the match duration with one of several univariate geoms: `geom_histogram`, `geom_density`, `geom_boxplot`. Here we consider the density plot.
+
+```{r message = FALSE, warning=FALSE}
+library(ggplot2)
+
+atp_matches %>% # We can use pipes with ggplot2!
+  ggplot(aes(x = minutes)) + 
+  geom_density()
+```
+
+
+---
+
+# Charting One Continuous Variable
+
+We can make a prettier chart with some customisation. A lot of those changes are taken care of for us with the package `ggthemes`. In what follows we use the `theme_gdocs` from this package, add colour, and add some fixes to the our axes scales.
+
+```{r message = FALSE, warning=FALSE}
+library(ggthemes) # Extra themes
+
+atp_matches %>%
+  ggplot(aes(x = minutes)) + 
+  geom_density(col = tableau_color_pal()(1)) +
+  theme_gdocs() + 
+  scale_x_continuous("Match Duration (Minutes)") +
+  scale_y_continuous("Density")
+```
+
+---
+
+# Interpreting Chart
+
+- What are some peculiarities we find with the minutes distribution?
+
+--
+
+- First, we have some matches with 0 minutes and others that are over 10 hours! 
+
+- We can use `dplyr` filters to investigate these possible errors in our data. 
+
+```{r}
+# Investigate outlier durations
+atp_matches %>%
+  dplyr::filter(minutes == 0 | minutes > 10 * 60)
+```
+
+---
+
+# Mutate and Chart
+
+--
+
+* Often we need to make some changes to do some tidying before we can explore. 
+
+--
+
+* Consider our interest in the distribution of service points won in a match 
+
+--
+
+* First, the information has to be calculated from the count of first serve points won (1stWon) and second service points won (2ndWon) our of all service points (svpt)
+
+--
+
+* Second, we have to put the information in long format because it is currently separated by column for winners and losers 
+
+--
+
+* Third, some matches have missing stats
+
+---
+
+# Mutate and Chart
+
+To tackle all these issues, we make a `serve_stats` dataset from filter, mutating, and reshaping our data.
+
+```{r}
+serve_stats <- atp_matches %>%
+    filter(!is.na(w_svpt)) %>% # Filter out missing
+    dplyr::mutate(
+      winner.serve.won = (w_1stWon + w_2ndWon) / w_svpt,
+      loser.serve.won = (l_1stWon + l_2ndWon) / l_svpt
+    ) %>%
+    tidyr::gather("winner", "serve.won", 
+                  winner.serve.won, loser.serve.won)
+```
+
+---
+
+# Charting Service Points Won
+
+Now we are ready to graphically explore the characteristics of service points won:
+
+1. Overall
+
+2. By Win Status
+
+---
+
+# Vertical and Horizontal Boxplots
+
+We can use `coord_flip` to control the direction of our boxplot summary. We can also use fill to control the colour of the box. 
+
+Here is the standard version.
+
+```{r}
+# Note we add a y-axix label when we have no grouping variable
+serve_stats %>%
+  ggplot(aes(y = serve.won * 100, x = "All Players")) + 
+  geom_boxplot(fill = solarized_pal()(1)) + 
+  theme_bw() + 
+  scale_y_continuous("ATP Service Points Won") + 
+  scale_x_discrete("")
+```
+
+
+---
+
+# Vertical and Horizontal Boxplots
+
+Here is the flipped version.
+
+```{r}
+serve_stats %>%
+  ggplot(aes(y = serve.won * 100, x = "All Players")) + 
+  geom_boxplot(fill = solarized_pal()(1)) + 
+  theme_bw() + 
+  scale_y_continuous("ATP Service Points Won") + 
+  scale_x_discrete("") + 
+  coord_flip()
+```
+
+---
+
+# Grouping by Win Status
+
+We can look at the difference in serve percentage won by win status by giving the group variable `winner` as the `x` aesthetic. We can also make nicer labels at the time of the function call.
+
+What does this comparison suggest?
+
+```{r}
+serve_stats %>%
+  ggplot(aes(y = serve.won * 100, 
+             x = factor(winner, labels = c("loser", "winner")))) + 
+  geom_boxplot(fill = solarized_pal()(1)) + 
+  theme_bw() + 
+  scale_x_discrete("Player Group") + 
+  scale_y_continuous("ATP Service Points Won") 
+```
+
+---
+
+# Multiple Variables
+
+* Multiple variables have many potential geoms that can be used for exploration.
+
+* Some key types are: `geom_point`, `geom_line`, `geom_smooth`.
+
+* Here we use the `geom_point` to look at trends in `minutes` by tournament date, excluding minute outliers.
+
+```{r}
+atp_matches %>%
+  filter(!(minutes == 0 | minutes > 10 * 60)) %>% # Remove outliers
+	ggplot(aes(y = minutes, x = tourney_date)) + 
+	geom_point(size = 2) + # Increase point size
+	theme_bw()
+```
+
+---
+
+# Smoothing Lines
+
+* We can add a smoothing line on top to see possible trends. This uses a `loess` smoother by default but that can be modified by request.
+
+* We can also customize the date scale using `scale_x_date`.
+
+```{r}
+atp_matches %>%
+  filter(!(minutes == 0 | minutes > 10 * 60)) %>% # Remove outliers
+	ggplot(aes(y = minutes, x = tourney_date)) +
+  geom_smooth(col = alpha("grey", 0.5), fill = "grey", alpha = 0.5) + 
+	geom_point(size = 2) + # Increase point size
+  scale_x_date("Event Week", date_breaks = "3 week") +
+	theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+
+---
+
+# Create Many Panels with Facet 
+
+How much does surface influence duration of matches? We can use faceting on `surface` to explore this. In what follows, we facet by row and make a separate colour for each surface but exclude `carpet` as a surface.
+
+```{r message = FALSE}
+atp_matches %>%
+  filter(!(minutes == 0 | minutes > 10 * 60), surface != "Carpet") %>%
+	ggplot(aes(y = minutes, x = tourney_date, 
+	           col = surface, fill = surface)) +
+  facet_grid(surface ~ .) + # Facet by row with no column facet
+  geom_smooth() + 
+	geom_point(size = 2) + 
+  scale_color_tableau(name = "") + 
+  scale_fill_manual(name = "", 
+                    values = alpha(tableau_color_pal()(3), 0.5)) + 
+  scale_x_date("Event Week", date_breaks = "3 week") +
+	theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+
+---
+
+# Practice: Graphing
+
+Use what we have explored so far to see what trends exist in service points won by month. 
+
+1. Use `lubridate` to create a `month` variable.
+
+2. Use the reshaped `serve_stats` dataset.
+
+3. Summarise the distribution by the median, 25th quantile and 75th quantile.
+
+4. Plot the summaries per month with `geom_pointrange`.
+
+---
+
+# Solution: Graphing
+
+```{r message = FALSE}
+library(lubridate)
+
+serve_stats %>%
+  dplyr::mutate(
+    month = month(tourney_date)
+  ) %>%
+  group_by(month) %>% # Summarise by month
+  dplyr::summarise(
+    median = median(serve.won) * 100,
+    low = quantile(serve.won, .25) * 100,
+    upper = quantile(serve.won, .75) * 100
+  ) %>%
+	ggplot(aes(y = median, ymin = low, ymax = upper, x = month)) + 
+	geom_pointrange(size = 2, col = tableau_color_pal()(1)) + 
+  scale_x_continuous("Month") +
+  scale_y_continuous("Service Points Won") +
+	theme_bw() 
+```  
+
+---
+
+# Charting Tracking Data
+
+* More and more sports are beginning to use tracking data
+
+* Tracking data refers to spatio-temporal data about events during a sporting event
+
+
+---
+
+# Tracking Serves
+
+- Load the `atp_serves` dataset
+
+- It contains smooth functions for 66 men's serves to the Ad Court
+
+```{r}
+data(atp_serves)
+
+str(atp_serves)
+```
+
+---
+
+# Smooth Positional Functions
+
+* Serve shots are described by two arcs
+
+* Each arc has 3 dimension that is summarised by a 3-degree polynomial
+
+* For, example, the $x$ location at time $t$ is:
+
+$$
+x(t) = x_0 + x_1 t + x_2 t^2 + x_3 t^3
+$$
+
+---
+
+# Charting
+
+* So far, we have only considered two-dimensional charts.
+
+* For 3D data, we can use the package `plot3D`.
+
+* But first, we need to extract the (x, y, z) coordinates for each serve along a set of time points.
+
+---
+
+# Function Writing
+
+First we write a function called `get_position` that takes the polynomial coefficients, start time, and end time and returns a data frame of 1000 positions and times, spread equally between the start and end times.
+
+```{r}
+get_position <- function(a, b, c, d, t0, t1){
+
+	# Create positional function
+	g <- function(t) c(a, b, c, d) %*% t^(0:3)
+	g <- Vectorize(g)
+
+	times <- seq(t0, t1, length = 1000)
+	
+data.frame(
+		position = g(times),
+		seconds = times
+	)
+}
+```
+
+---
+
+# Functional Programming
+
+We can use the package `purrr` and the function `map_df` to transform our serve polynomials into positional data. Here is the basic syntax for `map`.
+
+```{r eval = F}
+purrr:map(data, function)
+```
+
+* We can also use `~function` to create anonymous functions.
+
+* You can call variables in data symbolically with `.x$var`.
+
+
+---
+
+# Example: Mapping to Get Positions
+
+Let's see an example of how we can use `map` with `get_positions` to expand our polynomials into (x, y, z) positional coordinates. We use `map_df` because we want to have a data frame in long format.
+
+```{r message = FALSE}
+library(purrr) # Load purrr
+
+# Create a row id variable
+atp_serves$id <- interaction(atp_serves$serveid, atp_serves$arc)
+
+x_position <- atp_serves %>%
+	split(.$id) %>%
+	map_df(
+		~ get_position(.x$x0, .x$x1, .x$x2, .x$x3, 
+		               .x$start, .x$start + .x$duration)
+	)
+
+x_position[1:10,]
+```
+
+---
+
+# Practice: Mapping to Get Positions
+
+1. Repeat the same map steps to get the `y` and `z` positions.
+
+2. Create data frames `y_position` and `z_position` to store these positions data.
+
+
+---
+
+# Solution: Mapping to Get Positions
+
+
+```{r}
+y_position <- atp_serves %>%
+	split(.$id) %>%
+	map_df(
+		~ get_position(.x$y0, .x$y1, .x$y2, .x$y3, 
+		               .x$start, .x$start + .x$duration)
+	)
+
+z_position <- atp_serves %>%
+	split(.$id) %>%
+	map_df(
+		~ get_position(.x$z0, .x$z1, .x$z2, .x$z3, 
+		               .x$start, .x$start + .x$duration)
+	)	
+```
+
+---
+
+# Prepare for Plotting
+
+Next, we combine the positional data, assign the id for the serve that includes both arcs, and sort by seconds.
+
+```{r}
+# Combine
+positions <- data.frame(
+	seconds = x_position$seconds,
+	x = x_position$position,
+	y = y_position$position,
+	z = z_position$position,
+	id = str_replace(rep(sort(atp_serves$id), each = 1000), 
+	                 "(.*)(\\..*)", "\\1")
+)
+
+# Convert to numeric for colvar
+positions$id <- as.numeric(positions$id)		
+
+# Sort
+positions  <- positions[order(positions$id, positions$seconds),]
+
+positions[1:10,]
+```
+
+---
+
+# 3D Plots
+
+* We have all the information we need to plot the serve trajectories in 3 dimensions. 
+
+* The `plot3D` package provides a suite a functions for 3D plots: `points3D`, `lines3D`, `ribbon3D`, etc. 
+
+* You can install with `install.packages('plot3D')`
+
+
+---
+
+# Plot3D Key Arguments
+
+In addition to the basic variables `x`, `y`, `z`, here are some useful arguments when working with `plot3D`.
+
+```{r echo = F}
+data <- data.frame(
+  Argument = c("colvar", "phi", "theta", "col", "bty"),
+  Description = 
+    c("Numeric group variable for coloring points",
+      "Angle defining colatitude",
+      "Angle defining azimuthal direction",
+      "Colors to use with colvar",
+      "Style for the perspective box")
+)
+
+htmlTable(data, 
+          rnames = F, 
+          col.rgroup = c("none", "#F7F7F7"),
+          align = c("ll"),
+          css.cell = "padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;"
+          )
+```
+
+---
+
+# Plotting Serves
+
+In this chart, we plot all serves using the `points3D`. We set `theta` to 0 so that we look perpendicularly along the length of the court.
+
+```{r message = FALSE}
+library(plot3D) # Load plot3D
+
+points3D(
+	x = positions$x,
+	y = positions$y,
+	z = positions$z,
+	colvar = positions$id,
+	theta = 0
+)
+```
+
+
+
+---
+
+# Practice: 3D Plotting
+
+In the previous plot, it was difficult to see the serves because we had serves emanating from both the left and right-side of the court. 
+
+1. Add a variable to the dataset that indicates what side a serve starts from
+
+2. Restrict the plot to the serves on the negative side
+
+
+---
+
+# Solution: 3D Plotting
+
+
+```{r message = FALSE}
+positions <- positions %>%
+    group_by(id) %>%
+    dplyr::mutate(
+      negative = x[1] < 0
+    )
+
+points3D(
+	x = positions$x[positions$negative],
+	y = positions$y[positions$negative],
+	z = positions$z[positions$negative],
+	colvar = positions$id[positions$negative],
+	theta = 0
+)
+```
+
+---
+
+# Summary
+
+--
+
+- Exploring our data is one of the most interesting parts of data analysis
+
+--
+
+- But we need to be familiar with our variables and have specific questions to explore efficiently
+
+--
+
+- Most of the counting and summarising we need can be done with `dplyr`
+
+--
+
+- For graphing, `ggplot2` will take us very far and `plot3D` can give us an extra dimension to work with, when that is of interest.
+
+---
+
+# Resources
+
+- [ggplot2](http://ggplot2.tidyverse.org)
+
+- [ggthemes](https://www.rdocumentation.org/packages/ggthemes/versions/3.4.0)
+
+- [Tukey and EDA](https://www.qualitydigest.com/inside/quality-insider-article/exploring-tukey-s-exploratory-data-analysis.html)
+
+- [EDA by Roger Peng](https://leanpub.com/exdata)
