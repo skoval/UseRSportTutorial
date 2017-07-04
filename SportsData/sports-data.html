@@ -12,7 +12,7 @@
 class: center, middle, inverse, title-slide
 
 # Sports Analytics with R
-## 2017 Melbourne Data Science Week
+## UseR! Conference 2017
 ### Stephanie Kovalchik
 
 ---
@@ -39,25 +39,21 @@ class: center, middle, inverse, title-slide
 
 # Tutorial Resources
 
-- Course package: [WOMBATsport](https://github.com/skoval/WOMBATsport)
+- Course package: [deuce](https://github.com/skoval/deuce)
 
-- Course tutorial: [WOMBATtutorial](https://github.com/skoval/WOMBATtutorial)
+- Course tutorial: [UseRSportTutorial](https://github.com/skoval/UseRSportTutorial)
 
 - Contact: [s.a.kovalchik@gmail.com](s.a.kovalchik@gmail.com)
 
 ---
 
-.hbox[
-### Sports Data and Packages: &lt;br&gt; The Numbers and Tools for Sports Analysis
-]
 
----
+# What It's Like to Be a Sports Statistician
 
-# Tutorial Outline
+.left[
+- Finding sports data
 
-- Sports data
-
-- Scraping sports data
+- Web scraping sports data
 
 - Data wrangling
 
@@ -65,7 +61,19 @@ class: center, middle, inverse, title-slide
 
 - Predictive modelling
 
-- Blog publishing
+- Blogging
+]
+
+.right[
+![](halep_excited.gif)
+]
+
+---
+
+
+.hbox[
+## Finding Sports Data
+]
 
 ---
 
@@ -74,19 +82,11 @@ class: slide-img
 
 # Popular Types of Sports Data
 
---
-
 - Box Scores
-
---
 
 - Performance Metrics
 
---
-
 - Tracking Data
-
---
 
 - Wearable Data
 
@@ -99,7 +99,7 @@ class: slide-img
 A 'box score' is a generic term for the summary statistics reported about a single sporting event.
 
 &lt;div align="center"&gt;
-&lt;img src="1876boxscore.jpg" width=70%&gt;
+&lt;img src="1876boxscore.jpg" width=60%&gt;
 &lt;/div&gt;
 
 .footnote[
@@ -112,17 +112,13 @@ class: slide-img
 
 # Performance Metrics
 
-.left[
-- Player or team stats
+Performance metrics are usually repeated measures of team or players that are derived from historical box scores. 
 
-- Usually include multiple games
+&lt;br&gt;
 
-- Longitudinal/time series
-]
-
-.right[
-![](tennis-performance-metrics.png)
-]
+&lt;div align="center"&gt;
+&lt;img src="tennis-performance-metrics.png" width=80%&gt;
+&lt;/div&gt;
 
 ---
 
@@ -130,7 +126,7 @@ class: slide-img
 
 # Tracking Data
 
-'Tracking data' describes spatial temporal data of objects in a sporting event.
+'Tracking data' is spatio-temporal data of objects in a sporting event.
 
 &lt;br&gt;
 
@@ -145,170 +141,371 @@ class: slide-img
 
 # Wearables
 
-'Wearables' are technologies that collect data about athletes when worn. Biometrics and movement are two common types of data collected.
+.left[
+- 'Wearables' are technologies that collect data about athletes when worn. 
+
+- Biometrics and movement are two common types of data collected.
+]
+
+.right[
+&lt;div align="center"&gt;
+&lt;img src="afl_kick.jpg" width=80%&gt;
+&lt;/div&gt;
+]
+
+.footnote[
+[1] VU Biomechanics Lab
+]
+
+---
+
+class: slide-img
+
+# Data Availability Curve
+
+Sadly, not all types of sports data are equally available though the steepness of the curve depends on the particular sport.
+
+&lt;div align="center"&gt;
+&lt;img src="data_availability.png" width=70%&gt;
+&lt;/div&gt;
+
+---
+
+class: slide-img
+
+.left[
+<table class='gmisc_table' style='border-collapse: collapse; margin-left:-1em; margin-bottom:1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Category</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'><b>Multiple</b></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>www.databaseSports.com</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>www.opensourcesports.com</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.espn.com.au/blog/statsinfo</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.masseyratings.com/data.php</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'><b>American Football</b></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.bballsports.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.cfbstats.com/blog/college-football-data/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.databaseFootball.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.nfl.com/stats/player</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.pro-football-reference.com</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://stats.washingtonpost.com/cbk/teams.asp</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'><b>Baseball</b></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.baseball-almanac.com/teamstats/statmaster.php</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.baseballamerica.com/statistics/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.baseballheatmaps.com/graph/distanceleader.php</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.baseballmusings.com/cgi-bin/DayByDayDatabase.py</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.baseballprospectus.com/sortable/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.baseball-reference.com</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://baseballguru.com/battingdatabase.html</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.bballsports.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.databasebaseball.com</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.dougstats.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.fangraphs.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.hittrackeronline.com/index.php</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.baseball-links.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.retrosheet.org</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.sabr.org/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.seanlahman.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.statcorner.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.thebaseballcube.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'><b>Basketball</b></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.82games.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.apbr.org/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.basketball-reference.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.basketballvalue.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.bballsports.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.nba.com/statistics/index.html</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.databasebasketball.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.dougstats.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.finalfour.net/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.hoopdata.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.kenpom.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.ncaa.org/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; border-bottom: 2px solid grey; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; border-bottom: 2px solid grey; text-align: left;'>http://stats.washingtonpost.com/nba/</td>
+</tr>
+</tbody>
+</table>
+]
+
+.right[
+<table class='gmisc_table' style='border-collapse: collapse; margin-left:4em; margin-bottom:1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Category</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'><b>Hockey</b></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>https://puckalytics.com</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.bballsports.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.databasehockey.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://stats.hockeyanalysis.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.hockey-reference.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.hockeydb.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.nhlpa.com/stats/league-wide</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.nhl.com/ice/statshome.htm</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.quanthockey.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://stats.washingtonpost.com/nhl/teams.asp</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'><b>Soccer</b></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.football-data.co.uk/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.football-data.co.uk/data.php</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://soccerway.com</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.squawka.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.statto.com/football/stats</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.transfermarkt.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.whoscored.com/</td>
+</tr>
+<tr style='background-color: #e5f7f7;'>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: center;'></td>
+<td style='font-size:11px; background-color: #e5f7f7; text-align: left;'>http://www.worldcup.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'><b>Other</b></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.uci.ch/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.espncricinfo.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.databasegolf.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.tennisabstract.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.databaseSports.com/olympics</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.rugbydata.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.afl.com.au/stats</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.volleyball.org/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; text-align: left;'>http://www.databaseracing.com/</td>
+</tr>
+<tr style='background-color: #eeeeee;'>
+<td style='font-size:11px; background-color: #eeeeee; border-bottom: 2px solid grey; text-align: center;'></td>
+<td style='font-size:11px; background-color: #eeeeee; border-bottom: 2px solid grey; text-align: left;'>http://games.crossfit.com/leaderboard</td>
+</tr>
+</tbody>
+</table>
+]
+
+---
+
+class: slide-img
+
+# Case Studies
+
+Navigating sports sites and finding where data lives can sometimes be tricky. Let's get some practice by inspecting the following sites. For each case, determine where the main data lives, what type is there, and in what format.
 
 &lt;br&gt;
 
-&lt;div align="center"&gt;
-&lt;img src="bigfooty.jpg" width=80%&gt;
-&lt;/div&gt;
+1. [http://www.hockeydb.com/](http://www.hockeydb.com/) 
 
-
----
-
-class: slide-img
-
-# Resources: Multiple Sports
-
-  * [databaseSports](www.databaseSports.com)
-  
-  * [Open Source Sports](www.opensourcesports.com)
-  
-  * [ESPN Stats Info](http://www.espn.com.au/blog/statsinfo)
-  
-  * [Massey Ratings](http://www.masseyratings.com/data.php)
+2. [http://www.football-data.co.uk/data.php](http://www.football-data.co.uk/data.php) 
 
 ---
 
-class: slide-img
+# Answer: Hockey Database
 
-# Resources: American Football
+These data are under the 'Statistics' page and primarily exist as HTML tables.
 
-  - [BBALLsports.com](http://www.bballsports.com/)
-  - [College Football Statistics](http://www.cfbstats.com/blog/college-football-data/)
-  - [databaseFootball.com](http://www.databaseFootball.com/)
-  - [databaseFootball.com/College](http://www.databaseFootball.com/College)
-  - [NFL Statistics](http://www.nfl.com/stats/player)
-  - [Pro-football Reference](http://www.pro-football-reference.com)
-  - [Washingtonpost.com](http://stats.washingtonpost.com/cbk/teams.asp)
-  
----
-
-class: slide-img
-
-# Resources: Baseball
-  
-.left[
-- [Baseball Almanac](http://www.baseball-almanac.com/teamstats/statmaster.php)
-- [Baseball America](http://www.baseballamerica.com/statistics/)
-- [Baseball Heat Maps](http://www.baseballheatmaps.com/graph/distanceleader.php)
-- [Baseball Musings](http://www.baseballmusings.com/cgi-bin/DayByDayDatabase.py)
-- [Baseball Prospectus](http://www.baseballprospectus.com/sortable/)
-- [Baseball-Reference.com](http://www.baseball-reference.com)
-- [BaseballGuru.com](http://baseballguru.com/battingdatabase.html)
-- [BBALLsports.com](http://www.bballsports.com/)
-- [databaseBaseball.com](http://www.databasebaseball.com)
-- [Doug Steele's MLB and NBA statistics](http://www.dougstats.com/)
-- [FanGraphs](http://www.fangraphs.com/)
-- [Home Run Tracker](http://www.hittrackeronline.com/index.php)
-- [John Skillton's Baseball Links](http://www.baseball-links.com/)
-- [Retrosheet](http://www.retrosheet.org)
-- [SABR: The Society for American Baseball Research](http://www.sabr.org/)
-]
-
-.right[
-- [Sean Lahman's Baseball Archive](http://www.seanlahman.com/baseball-archive/statistics/)
-- [StatCorner](http://www.statcorner.com/)
-- [The Baseball Cube](http://www.thebaseballcube.com/)
-]
+![](hockeydb.png)
 
 ---
 
-class: slide-img
+# Answer: Football UK
 
-# Resources: Basketball
+A repository of betting data on soccer matches is available under the 'Historical Data' and these data are available as CSV files.
 
-- [82games.com](http://www.82games.com/)
-- [APBR](http://www.apbr.org/)
-- [Basketball Reference](http://www.basketball-reference.com/)
-- [basketballvalue.com](http://www.basketballvalue.com/)
-- [BBALLsports.com](http://www.bballsports.com/)
-- [Currrent NBA Stats](http://www.nba.com/statistics/index.html)
-- [DatabaseBasketball](http://www.databasebasketball.com/)
-- [Doug Steele's MLB and NBA statistics](http://www.dougstats.com/)
-- [Final Four](http://www.finalfour.net/)
-- [Hoopdata.com](http://www.hoopdata.com/)
-- [Ken Pomeroy's college basketball site](http://www.kenpom.com/)
-- [NCAA Final Four](http://www.ncaa.org/)
-- [Washingtonpost.com](http://stats.washingtonpost.com/nba/)
+![](footballuk.png)
 
 ---
-
-class: slide-img
-
-# Resources: Hockey
-
-
-- [Puckalytics](https://puckalytics.com)
-- [BBALLsports.com](http://www.bballsports.com/)
-- [databaseHockey.com](http://www.databasehockey.com/)
-- [Hockey Analysis](http://stats.hockeyanalysis.com/)
-- [Hockey Reference](http://www.hockey-reference.com/)
-- [hockeyDB.com](http://www.hockeydb.com/)
-- [NHL Players' Association Statistics](http://www.nhlpa.com/stats/league-wide)
-- [NHL.com](http://www.nhl.com/ice/statshome.htm)
-- [QuantHockey.com](http://www.quanthockey.com/)
-- [Washingtonpost.com](http://stats.washingtonpost.com/nhl/teams.asp)
-
----
-
-class: slide-img
-
-# Resources: Soccer
-
-- [football data](http://www.football-data.co.uk/)
-- [Football-Data.co.uk](http://www.football-data.co.uk/data.php)
-- [Soccerway](http://soccerway.com)
-- [squawka](http://www.squawka.com/)
-- [Statto.com](http://www.statto.com/football/stats)
-- [Transfermarkt](http://www.transfermarkt.com/)
-- [WhoScored.com](http://www.whoscored.com/)
-- [World Cup Soccer](http://www.worldcup.com/)
-
----
-
-class: slide-img
-
-# Resources: Individual and Other Sports
-
-.left[
-- Cycling
-  - [Union Cycliste Internationale](http://www.uci.ch/)
-- Cricket
-  - [Cricinfo](http://www.espncricinfo.com/)
-  - [Cricketarchive.com](http://cricketarchive.com/Miscellaneous/statistics.html)  
-- Fencing
-  - [United States Fencing Association](http://www.usfa.org/)
-- Golf
-  - [databaseGolf.com](http://www.databasegolf.com/)
-- Tennis
-  - [ATP Tour](http://www.atpworldtour.com/)
-  - [WTA Tour](http://www.wtatennis.com/)
-  - [Tennis Abstract](http://www.tennisabstract.com/)
-]
-
-.right[
-- Olympics
-  - [databaseOlympics](http://www.databaseSports.com/olympics)
-  - [Official Olympics Site](http://www.olympic.org/uk/index_uk.asp)
-  - [Olympics at Sports-Reference.com](http://www.sports-reference.com/olympics/)
-- Rugby
-  - [Rugby Data](http://www.rugbydata.com/)
-- AFL
-  - [AFL Statistics](http://www.afl.com.au/stats)
-- Volleyball
-  - [Volleyball Worldwide](http://www.volleyball.org/)
-- Racing
-  - [databaseRacing.com](http://www.databaseracing.com/)
-  - [F1 Facts](http://f1-facts.com/stats)
-- Other
-  - [CrossFit Games](http://games.crossfit.com/leaderboard)
-  - [Massey Data](http://www.masseyratings.com/data.php)
-]
-
----
-
-class: slide-img
 
 # Packages
 
@@ -317,43 +514,126 @@ class: slide-img
 <tr>
 <th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Sport</th>
 <th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Package</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>What.it.Does</th>
 </tr>
 </thead>
 <tbody>
 <tr style='background-color: #ffffff;'>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'>General</td>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'>stattleshipR</td>
+<td style='width:20%; background-color: #ffffff; text-align: center;'>General</td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>stattleshipR</td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>Data capture API for multiple sports</td>
 </tr>
 <tr style='background-color: #ffffff;'>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'></td>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'>SportsAnalytics</td>
+<td style='width:20%; background-color: #ffffff; text-align: center;'></td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>SportsAnalytics</td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>Sports datasets and WEB import functions</td>
 </tr>
 <tr style='background-color: #ffffff;'>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'></td>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'>odds.converter</td>
+<td style='width:20%; background-color: #ffffff; text-align: center;'></td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>odds.converter</td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>Convert odds to probabilities</td>
 </tr>
 <tr style='background-color: #eeeeee;'>
-<td style='width: 70%;text-align:center; background-color: #eeeeee; text-align: center;'>Soccer</td>
-<td style='width: 70%;text-align:center; background-color: #eeeeee; text-align: center;'>engsoccerdata</td>
+<td style='width:20%; background-color: #eeeeee; text-align: center;'>Soccer</td>
+<td style='width:20%; background-color: #eeeeee; text-align: left;'>engsoccerdata</td>
+<td style='width:20%; background-color: #eeeeee; text-align: left;'>Repository of soccer datasets from 1871 to present</td>
 </tr>
 <tr style='background-color: #ffffff;'>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'>Baseball</td>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'>pitchRx</td>
+<td style='width:20%; background-color: #ffffff; text-align: center;'>Baseball</td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>pitchRx</td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>Access to MLB Gameday data including pitchFX</td>
 </tr>
 <tr style='background-color: #ffffff;'>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'></td>
-<td style='width: 70%;text-align:center; background-color: #ffffff; text-align: center;'>Lahman</td>
+<td style='width:20%; background-color: #ffffff; text-align: center;'></td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>Lahman</td>
+<td style='width:20%; background-color: #ffffff; text-align: left;'>Sean Lahman baseball database</td>
 </tr>
 <tr style='background-color: #eeeeee;'>
-<td style='width: 70%;text-align:center; background-color: #eeeeee; text-align: center;'>Tennis</td>
-<td style='width: 70%;text-align:center; background-color: #eeeeee; text-align: center;'>deuce</td>
+<td style='width:20%; background-color: #eeeeee; text-align: center;'>Tennis</td>
+<td style='width:20%; background-color: #eeeeee; text-align: left;'>deuce</td>
+<td style='width:20%; background-color: #eeeeee; text-align: left;'>Repository of multiple tennis datasets</td>
 </tr>
 <tr style='background-color: #ffffff;'>
-<td style='width: 70%;text-align:center; background-color: #ffffff; border-bottom: 2px solid grey; text-align: center;'>Cricket</td>
-<td style='width: 70%;text-align:center; background-color: #ffffff; border-bottom: 2px solid grey; text-align: center;'>cricketr!</td>
+<td style='width:20%; background-color: #ffffff; border-bottom: 2px solid grey; text-align: center;'>Cricket</td>
+<td style='width:20%; background-color: #ffffff; border-bottom: 2px solid grey; text-align: left;'>cricketr!</td>
+<td style='width:20%; background-color: #ffffff; border-bottom: 2px solid grey; text-align: left;'>Functions for analyzing ESPN Cricinfo stats</td>
 </tr>
 </tbody>
 </table>
+
+---
+
+# More on `deuce`
+
+--
+
+* `deuce` is a package I created to make it easy to access large historical data on tennis matches
+
+--
+
+* It combines data from multiple sites: 
+  - [flashscore.com](www.flashscore.com)
+  - [ATP Tour](http://atptour.com)
+  - [WTA Tour](http://www.wtatennis.com)
+  - [Tennis Abstract](www.tennisabstract.com)
+  
+
+--
+
+* Some of the data you can obtain from `deuce` includes:
+
+  - Match results from Open Era (1968) to the present
+
+  - Historical rankings
+
+  - Player demographics
+
+  - Point-level data for multiple years at Grand Slams
+
+  - Shot level data from the Match Charting Project
+  
+---
+
+class: slide-img
+
+# Installing `deuce`
+
+You can install deuce using `devtools`. It may take several minutes because of the size of the datasets being transferred.
+
+&lt;br&gt;
+
+
+```r
+library(devtools)
+
+devtools::install_github("skoval/deuce")
+```
+
+---
+
+class: slide-img
+
+# Using Documentation
+
+One of the best ways to get familiar with what a package does is to look at the package index. Try the following:
+
+
+```r
+library(deuce)
+
+help(package = "deuce")
+```
+
+&lt;br&gt;
+
+How would you learn about the contents of `atp_matches`?
+
+--
+
+
+```r
+help("atp_matches", package = "deuce")
+```
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({

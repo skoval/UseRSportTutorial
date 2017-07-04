@@ -29,31 +29,8 @@ _Exploratory data analysis is detective work-numerical detective work-or countin
 
 ---
 
-# Steps in EDA
 
---
-
-- Asking Questions
-
---
-
-- Counting
-
---
-
-- Describing
-
---
-
-- Charting
-
---
-
-- Formulate Hunches
-
----
-
-# Asking Questions
+# EDA Starts With Specific Questions
 
 .left[
 - All exploration needs some direction
@@ -69,416 +46,138 @@ _Exploratory data analysis is detective work-numerical detective work-or countin
 
 ---
 
-# Know Your Variables
+# Our Questions
 
-.cbox[
-But you can only begin to ask questions when you have a good grasp of what information you have to explore and all the possible directions you could go.
+In this tutorial we will use EDA to investigate some conventional wisdom in tennis. Here are 3 ideas commentators repeatedly say:
+
+.left[
+1. Second serve is more important than the first serve
+
+2. Players who serve first have an advantage
+
+3. The 7th game is the most important in a set
+]
+
+
+.right[
+![](barkley.gif)
 ]
 
 ---
 
-# Know Your Variables
+# Match Data
 
-Some useful functions for getting to know the variables in your dataset are:
+To examine the first question we will use the `atp_matches` data set from the `deuce` package.
+
+Load the data, limit to the years 2005 to 2015.
+
+
+```r
+library(deuce)
+
+data(atp_matches)
+
+atp_matches &lt;- atp_matches %&gt;% 
+  dplyr::filter(year &gt;= 2005 &amp; year &lt;= 2015)
+```
+
+---
+
+# Variable Documentation
+
+Use the `help` function to learn about the contents of the `atp_matches`. What do these data include?
 
 &lt;br&gt;
 
-<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
-<thead>
-<tr>
-<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Function</th>
-<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>dim</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Count of rows and columns</td>
-</tr>
-<tr style='background-color: #f7f7f7;'>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>str</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>Summarizes the structure of each variable</td>
-</tr>
-<tr>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>summary</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Statistical summary of each variable</td>
-</tr>
-<tr style='background-color: #f7f7f7;'>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;'>table</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;'>Tabulate all unique values in a variable</td>
-</tr>
-</tbody>
-</table>
+
+```r
+help("atp_matches", package = "deuce")
+```
 
 ---
 
-# Example: Knowing Your Variables
+# Second vs First Serve
 
-Explore the dataset provided in the `atp_matches` file, with cleaned versions of the 2016 match data. 
+.cbox[
+The first question we will consider is the importance of the second serve versus the first serve. 
+]
 
-1. Determine the rows and columns of the dataset
+&lt;br&gt;
 
-2. Evaluate the structure of the data and types of each variable
 
-3. Identify some questions we could explore with these data?
+- One implication of this statement is that we might expect the winner of a match to have outperformed on second serve compared to first serve
+
+- This suggests focusing on the difference in winner and loser service stats
 
 ---
 
-# Example: Knowing Your Variables
+# Service Points Won
 
+For each match, we will calculate the proportion of second serve points won and first points won for the winner and loser of the match.
+
+&lt;br&gt;
 
 
 ```r
-library(WOMBATsport)
-
-data(atp_matches)
-	
-dim(atp_matches) # Rows and variables
-```
-
-```
-## [1] 2877   14
-```
-
----
-
-# Example: Knowing Your Variables
-
-
-```r
-str(atp_matches) # Examine structure
-```
-
-```
-## 'data.frame':	2877 obs. of  14 variables:
-##  $ tourney_name: chr  "Brisbane" "Brisbane" "Brisbane" "Brisbane" ...
-##  $ surface     : chr  "Hard" "Hard" "Hard" "Hard" ...
-##  $ draw_size   : num  32 32 32 32 32 32 32 32 32 32 ...
-##  $ tourney_date: Date, format: "2016-01-04" "2016-01-04" ...
-##  $ winner_name : chr  "Milos Raonic" "Roger Federer" "Milos Raonic" "Roger Federer" ...
-##  $ loser_name  : chr  "Roger Federer" "Dominic Thiem" "Bernard Tomic" "Grigor Dimitrov" ...
-##  $ round       : Ord.factor w/ 8 levels "RR"&lt;"R128"&lt;"R64"&lt;..: 8 7 7 6 6 6 6 5 5 5 ...
-##  $ minutes     : num  87 60 107 127 119 76 119 55 167 106 ...
-##  $ w_1stWon    : num  28 23 40 45 41 27 45 18 51 37 ...
-##  $ w_2ndWon    : num  14 12 19 19 20 12 13 12 25 16 ...
-##  $ w_svpt      : num  60 49 79 83 84 52 97 40 117 77 ...
-##  $ l_1stWon    : num  25 18 41 46 41 33 35 15 51 36 ...
-##  $ l_2ndWon    : num  14 9 16 21 27 9 15 6 23 15 ...
-##  $ l_svpt      : num  61 55 84 104 98 73 84 46 120 79 ...
-```
-
-
----
-
-# Some Questions We Could Explore
-
-Here are a sample of the questions that the `atp_matches` would allow us to explore:
-
---
-
-1. What are the number of events in the ATP season?
-
---
-
-2. How many matches and events do ATP players play in a year?
-
---
-
-3. What is the usual duration of an ATP match?
-
---
-
-4. What is the typical percentage of service points won? 
-
---
-
-5. How does the the distribution of service points differ between winners and losers of matches?
-
----
-
-# Useful Tools for Counting
-
-- Several of the questions we are interested in involve the occurrences, which are simply the count of things.
-
-- Some useful `dplyr` counting functions are shown below.
-
-
-<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
-<thead>
-<tr>
-<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Function</th>
-<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>n</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Count elements of a variable</td>
-</tr>
-<tr style='background-color: #f7f7f7;'>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>count</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>Count the unique instances of each value of a variable</td>
-</tr>
-<tr>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; border-bottom: 2px solid grey; text-align: left;'>n_distinct</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; border-bottom: 2px solid grey; text-align: left;'>Count the unique values of a variable</td>
-</tr>
-</tbody>
-</table>
-
----
-
-# Example: Counting
-
-* One of the questions we want to explore with the `atp_matches` is the number of events in the 2016 season. 
-
-* This is the same as asking for the unique tournaments in the dataset. 
-
-* We can do this with `n_distinct`
-
-
-```r
-atp_matches %&gt;%
-  dplyr::summarise(
-    events = n_distinct(tourney_name)
-  )
-```
-
-```
-##   events
-## 1    132
-```
-
----
-
-# Practice: Counting
-
-How many different players won at least one match in the 2016 season?
-
---
-
-_Answer:_
-
-
-```r
-atp_matches %&gt;%
-  dplyr::summarise(
-    winners = n_distinct(winner_name)
-  )
-```
-
-```
-##   winners
-## 1     284
-```
-
----
-
-# Example: Summarizing Counts
-
-* Another question we were interested in was the number of matches played by ATP players in a given year. 
-
-* In this case, we want a count per player so we need to use `group_by`.
-
-* But we also need to reshape our data, which currently has winner and loser by column, and make one `player` variable.
-
---
-
-
-```r
-# Stringing reshape and summary steps together
-match_summary &lt;- atp_matches %&gt;%
-    tidyr::gather("result", "player", winner_name, loser_name) %&gt;%
-    group_by(player) %&gt;%
-    dplyr::summarise(
-      matches = n()
-    )
-
-summary(match_summary$matches)
-```
-
-```
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    1.00    1.00    3.00   13.44   18.25   84.00
-```
-
----
-
-# Practice: Events Players
-
-Modify the code we just used to determine matches played, to find _tournaments_ played per player. What is the median for 2016?
-
---
-
-*Answer:*
-
-
-```r
-event_summary &lt;- atp_matches %&gt;%
-    tidyr::gather("result", "player", winner_name, loser_name) %&gt;%
-    group_by(player) %&gt;%
-    dplyr::summarise(
-      events = n_distinct(tourney_name)
-    )
-
-summary(event_summary$matches)
-```
-
-```
-## Warning: Unknown column 'matches'
-```
-
-```
-## Length  Class   Mode 
-##      0   NULL   NULL
-```
-
----
-
-# Describing
-
-* When exploring, we also will want to apply statistical summaries that are often tailor-made to the variable of interest.
-
-* Consider the `minutes` variable which as the match duration in minutes. 
-
-* We can string together multiple summaries with the `summarise` function in `dplyr`.
-
---
-
-
-```r
-minutes_summary &lt;- atp_matches %&gt;%
-    dplyr::summarise(
-      n.missing = sum(is.na(minutes)),
-      min = min(minutes, na.rm = T),
-      avg = mean(minutes, na.rm = T),
-      sd = sd(minutes, na.rm = T)
+atp_matches &lt;- atp_matches %&gt;%
+    dplyr::mutate(
+      w_first = w_1stWon / w_svpt,
+      w_second = w_2ndWon / w_svpt,
+      l_first = l_1stWon / l_svpt,
+      l_second = l_2ndWon / l_svpt
     )
 ```
 
 ---
 
-# Summarising Multiple Columns
+# Summarise First and Second Differential
 
-It is easy to apply a standard set of summaries to a group of columns using `summarise_each`. Here are some standards you will want to include in a general statistical summary:
-
-1. Count of missing variables
-
-2. Measure of central tendency ("what is typical")
-
-3. Measure of variance (sd, var, IQR, etc.)
-
-
----
-
-# Summarising Multiple Columns
-
-If we want to apply a summary to all numerical variables we can use `select` and `summarise_each` together. Below we select all variables from `minutes` to `l_svpt` using the range operator `:`.
+Let's look at the difference in the winner and loser stats on each serve. 
 
 
 ```r
-atp_matches %&gt;%
-	dplyr::select(minutes:l_svpt)	%&gt;%
-	dplyr::summarise_each(
-		funs(
-			missing = sum(is.na(.)),
-			mean = mean,
-			median = median,
-			sd = sd
-			)
-	)
+summary(with(atp_matches, w_first - l_first))
 ```
 
 ```
-##   minutes_missing w_1stWon_missing w_2ndWon_missing w_svpt_missing
-## 1              22               25               25             25
-##   l_1stWon_missing l_2ndWon_missing l_svpt_missing minutes_mean
-## 1               25               25             25           NA
-##   w_1stWon_mean w_2ndWon_mean w_svpt_mean l_1stWon_mean l_2ndWon_mean
-## 1            NA            NA          NA            NA            NA
-##   l_svpt_mean minutes_median w_1stWon_median w_2ndWon_median w_svpt_median
-## 1          NA             NA              NA              NA            NA
-##   l_1stWon_median l_2ndWon_median l_svpt_median minutes_sd w_1stWon_sd
-## 1              NA              NA            NA         NA          NA
-##   w_2ndWon_sd w_svpt_sd l_1stWon_sd l_2ndWon_sd l_svpt_sd
-## 1          NA        NA          NA          NA        NA
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##   -0.50    0.02    0.08    0.09    0.14    0.88  224474
 ```
 
 ---
 
-# Advanced Select 
+# Filtering 
 
-Note we could have achieved the same using the `contains` function. Here is the equivalent summary code:
+One problem with the previous summary is that we have included some matches with NA stats and 0-values stats, as well as matches ending in retirement. How would you correct this?
 
-
-```r
-atp_matches %&gt;%
-	dplyr::select(minutes, contains("w_"), contains("l_"))	%&gt;%
-	dplyr::summarise_each(
-		funs(
-			missing = sum(is.na(.)),
-			mean = mean,
-			median = median,
-			sd = sd
-			)
-	)
-```
-
-```
-##   minutes_missing draw_size_missing w_1stWon_missing w_2ndWon_missing
-## 1              22                 0               25               25
-##   w_svpt_missing l_1stWon_missing l_2ndWon_missing l_svpt_missing
-## 1             25               25               25             25
-##   minutes_mean draw_size_mean w_1stWon_mean w_2ndWon_mean w_svpt_mean
-## 1           NA        59.0073            NA            NA          NA
-##   l_1stWon_mean l_2ndWon_mean l_svpt_mean minutes_median draw_size_median
-## 1            NA            NA          NA             NA               32
-##   w_1stWon_median w_2ndWon_median w_svpt_median l_1stWon_median
-## 1              NA              NA            NA              NA
-##   l_2ndWon_median l_svpt_median minutes_sd draw_size_sd w_1stWon_sd
-## 1              NA            NA         NA     42.18595          NA
-##   w_2ndWon_sd w_svpt_sd l_1stWon_sd l_2ndWon_sd l_svpt_sd
-## 1          NA        NA          NA          NA        NA
-```
-
----
-
-# Anonymous Functions
-
-- What was a problem with the results in the previous summaries? 
-
-- We have missing values but out functions include missing values by default.
-
-- We can fix this using anonymous functions call, where we pass a variable with the `.` syntax.
+--
 
 
 ```r
-atp_matches %&gt;%
-	dplyr::select(minutes:l_svpt)	%&gt;%
-	dplyr::summarise_each(
-		funs(
-			missing = sum(is.na(.)),
-			mean = mean(., na.rm = T),
-			median = median(., na.rm = T),
-			sd = sd(., na.rm = T)
-			)
-	)
+summary(with(
+  subset(atp_matches, !is.na(w_svpt) &amp; w_svpt != 0 
+         &amp; !is.na(l_svpt) &amp; l_svpt != 0 &amp; !Retirement), 
+             w_first - l_first))
 ```
 
 ```
-##   minutes_missing w_1stWon_missing w_2ndWon_missing w_svpt_missing
-## 1              22               25               25             25
-##   l_1stWon_missing l_2ndWon_missing l_svpt_missing minutes_mean
-## 1               25               25             25     108.9068
-##   w_1stWon_mean w_2ndWon_mean w_svpt_mean l_1stWon_mean l_2ndWon_mean
-## 1      37.34397      17.31311    80.30891      33.50701      15.56557
-##   l_svpt_mean minutes_median w_1stWon_median w_2ndWon_median w_svpt_median
-## 1    83.53471            101              35              16            75
-##   l_1stWon_median l_2ndWon_median l_svpt_median minutes_sd w_1stWon_sd
-## 1              31              14            78    47.1776    14.19496
-##   w_2ndWon_sd w_svpt_sd l_1stWon_sd l_2ndWon_sd l_svpt_sd
-## 1    7.167862  30.78574    14.91295    7.460753  30.50255
+##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## -0.35260  0.01658  0.07684  0.08371  0.14330  0.61300
 ```
+
+
+```r
+summary(with(
+  subset(atp_matches, !is.na(w_svpt) &amp; w_svpt != 0 
+         &amp; !is.na(l_svpt) &amp; l_svpt != 0 &amp; !Retirement),  
+             w_second - l_second))
+```
+
+```
+##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## -0.36840 -0.01673  0.03355  0.03709  0.08689  0.51210
+```
+
 
 ---
 
@@ -539,738 +238,232 @@ To install, use `install.packages('ggplot2')`.
 
 ---
 
-# Charting One Continuous Variable
+# Charting Serve Differentials
 
-We could also describe the match duration with one of several univariate geoms: `geom_histogram`, `geom_density`, `geom_boxplot`. Here we consider the density plot.
+We could describe the difference in service stats with one of several univariate geoms: `geom_histogram`, `geom_density`, `geom_boxplot`.
+
+&lt;br&gt;
+
+1. Reshape the data to long format with first and second serve differences stacked length-wise
+
+2. Then use `geom_boxplot` to look at the difference in the differentials for the first and second.
+
+3. What do you conclude about the comparative importance of first and second serve?
+
+---
+
+# Solution: Charting Serve Differentials
+
+
+
+```r
+# Prepare long format
+serve_stats &lt;- atp_matches %&gt;%
+  filter(!is.na(w_svpt), w_svpt != 0, 
+         !is.na(l_svpt), l_svpt != 0, !Retirement) %&gt;%
+  dplyr::mutate(
+    first = w_first - l_first,
+    second = w_second - l_second
+  ) %&gt;%
+  gather("serve", "value", first, second)
+```
+
+---
+
+# Solution: Charting Serve Differentials
 
 
 ```r
 library(ggplot2)
+library(ggthemes) # Extra themes
 
-atp_matches %&gt;% # We can use pipes with ggplot2!
-  ggplot(aes(x = minutes)) + 
-  geom_density()
+serve_stats %&gt;% # We can use pipes with ggplot2!
+  ggplot(aes(y = value, x = serve)) + 
+  geom_boxplot() + 
+  theme_gdocs()
 ```
 
 ---
 
-# Charting One Continuous Variable
-
-
-![](explore_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
-
+![](explore_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
 
 ---
 
-# Charting One Continuous Variable
+# Interpretation
 
-We can make a prettier chart with some customisation. A lot of those changes are taken care of for us with the package `ggthemes`. In what follows we use the `theme_gdocs` from this package, add colour, and add some fixes to the our axes scales.
+.left[
+- We see a greater gap in the stats on the first serve compared to the second
+
+- This suggests that it is a stronger differentiator between winning and losing 
+]
+
+.right[
+![](serve.gif)
+]
+
+---
+
+# Serving First
+
+- Next, let's consider the importance of serving first and what advantage that has for winning matches
+
+- For this question, we will make use of the `gs_point_by_point` data which includes point-level data for several years of Grand Slam matches
 
 
 ```r
-library(ggthemes) # Extra themes
+data("gs_point_by_point")
 
-atp_matches %&gt;%
-  ggplot(aes(x = minutes)) + 
-  geom_density(col = tableau_color_pal()(1)) +
-  theme_gdocs() + 
-  scale_x_continuous("Match Duration (Minutes)") +
-  scale_y_continuous("Density")
+gs_point_by_point &lt;- gs_point_by_point %&gt;%
+  filter(Tour == "atp") 
 ```
-
 
 ---
 
-# Charting One Continuous Variable
+# Practice: Exploring Serve Advantage
 
+1. Sort the data by match and point number
+
+2. Determine the percentage of players who served first that won the match
+
+3. Determine the percentage who served second and won the match
+
+4. Chart your results using a bar chart
+
+---
+
+# Solution: Exploring Serve Advantage
+
+Here we sort and calculate the outcome with respect to the first and second server
+
+
+```r
+# Sort data
+gs_point_by_point &lt;- 
+  gs_point_by_point[order(gs_point_by_point$match_id, gs_point_by_point$PointNumber),]
+
+serve_advantage &lt;- gs_point_by_point %&gt;%
+  group_by(match_id) %&gt;%
+  dplyr::summarise(
+    first.serve.won = PointServer[1] == PointWinner[n()],
+    second.serve.won = ifelse(PointServer[1] == 1, 2, 1) == PointWinner[n()]
+  )
+```
+
+---
+
+# Solution: Exploring Serve Advantage
+
+Now we summarise and reshape the data to prepate for charting.
+
+
+```r
+serve_advantage &lt;- serve_advantage %&gt;%
+  dplyr::summarise(
+    first.serve.won = mean(first.serve.won),
+    second.serve.won = mean(second.serve.won)
+  ) %&gt;%
+  gather("order", "win", first.serve.won, second.serve.won)
+
+serve_advantage %&gt;%
+  ggplot(aes(y = win * 100, x = order, fill = order)) + 
+  geom_bar(stat = "identity") +
+  scale_y_continuous("Win Percentage", lim = c(0, 100)) +
+  scale_fill_tableau(name = "") + 
+  theme_gdocs()
+```
+
+---
+
+![](explore_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+
+We find a near 10 percentage point advantage with serving first!
+
+---
+
+# Practice: Game 7
+
+Using the same point-level dataset and similar methods, investigating whether the "all-important game 7" is really that important for winning a set.
+
+1. Determine how often the winner of the 7th game of a set won the set
+
+2. Limit your analysis to "close" sets, which we will define as sets with 10 more games
+
+3. Plot the percentage difference in set wins for winner's and loser's of game 7
+
+---
+
+# Solution: Game 7
+
+First we prepare the variables for summarising the set wins.
+
+
+```r
+# Determine max games
+game7 &lt;- gs_point_by_point %&gt;%
+  group_by(match_id, SetNo) %&gt;%
+  dplyr::mutate(
+    MaxGame = max(GameNo),
+    SetWinner = PointWinner[n()]
+)
+
+# Filter and determine game 7 winner
+game7 &lt;- game7 %&gt;%
+  filter(MaxGame &gt;= 10) %&gt;%
+  group_by(match_id, SetNo) %&gt;%
+  dplyr::mutate(
+    Game7 = PointWinner[max(which(GameNo == 7))]
+)
+```
+
+---
+
+# Solution: Game 7
+
+Now, we summarise the set win percentages by game 7 status.
+
+
+```r
+game7 &lt;- game7 %&gt;%
+  group_by(match_id, SetNo) %&gt;%
+  dplyr::summarise(
+    game7.winner = Game7[1] == SetWinner[1],
+    game7.loser = ifelse(Game7[1] == 1, 2, 1) == SetWinner[1]
+)
+
+# Summarise and put in long format
+game7 &lt;- as.data.frame(game7) %&gt;%
+  dplyr::summarise(
+    game7.winner = mean(game7.winner),
+    game7.loser = mean(game7.loser)
+  ) %&gt;%
+  gather("gamewinner", "setwin", game7.winner, game7.loser)
+```
+
+---
+
+# Solution: Game 7
+
+Now we are ready to chart our findings.
+
+
+```r
+game7 %&gt;%
+  ggplot(aes(y = setwin * 100, x = gamewinner, fill = gamewinner)) + 
+  geom_bar(stat = "identity") +
+  scale_y_continuous("Set Win Percentage", lim = c(0, 100)) +
+  scale_fill_solarized(name = "") + 
+  theme_gdocs()
+```
 
 ![](explore_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
 
 ---
 
-# Interpreting Chart
-
-- What are some peculiarities we find with the minutes distribution?
-
---
-
-- First, we have some matches with 0 minutes and others that are over 10 hours! 
-
-- We can use `dplyr` filters to investigate these possible errors in our data. 
-
-
-```r
-# Investigate outlier durations
-atp_matches %&gt;%
-  dplyr::filter(minutes == 0 | minutes &gt; 10 * 60)
-```
-
-```
-##            tourney_name surface draw_size tourney_date
-## 1                Sydney    Hard        32   2016-01-11
-## 2                 Sofia    Hard        32   2016-02-01
-## 3  Indian Wells Masters    Hard       128   2016-03-07
-## 4         Miami Masters    Hard       128   2016-03-21
-## 5             Marrakech    Clay        32   2016-04-04
-## 6          Rome Masters    Clay        64   2016-05-09
-## 7                 Halle   Grass        32   2016-06-13
-## 8                 Halle   Grass        32   2016-06-13
-## 9                London   Grass        32   2016-06-13
-## 10        Winston-Salem    Hard        64   2016-08-22
-## 11              Beijing    Hard        32   2016-10-03
-## 12                Tokyo    Hard        32   2016-10-03
-## 13               Vienna    Hard        32   2016-10-24
-## 14        Paris Masters    Hard        64   2016-10-31
-##              winner_name            loser_name round minutes w_1stWon
-## 1          Gilles Muller         Jeremy Chardy    QF    1146       32
-## 2  Roberto Bautista Agut      Filip Krajinovic   R16       0       NA
-## 3  Roberto Bautista Agut       Mikhail Youzhny   R64       0       NA
-## 4          Tomas Berdych            Rajeev Ram   R64       0       NA
-## 5            Borna Coric        Simone Bolelli   R16       0       NA
-## 6          Lucas Pouille           Juan Monaco    QF       0       NA
-## 7          Dominic Thiem Philipp Kohlschreiber    QF       0       NA
-## 8          Florian Mayer         Kei Nishikori   R16       0       NA
-## 9            Kyle Edmund    Paul Henri Mathieu   R16       0       NA
-## 10      Andrey Kuznetsov       Mikhail Youzhny   R32       0       NA
-## 11       Grigor Dimitrov          Milos Raonic    SF       0       NA
-## 12          Nick Kyrgios        Radek Stepanek   R16       0       NA
-## 13           Andy Murray          David Ferrer    SF       0       NA
-## 14           Andy Murray          Milos Raonic    SF       0       NA
-##    w_2ndWon w_svpt l_1stWon l_2ndWon l_svpt
-## 1        13     59       34       10     69
-## 2        NA     NA       NA       NA     NA
-## 3        NA     NA       NA       NA     NA
-## 4        NA     NA       NA       NA     NA
-## 5        NA     NA       NA       NA     NA
-## 6        NA     NA       NA       NA     NA
-## 7        NA     NA       NA       NA     NA
-## 8        NA     NA       NA       NA     NA
-## 9        NA     NA       NA       NA     NA
-## 10       NA     NA       NA       NA     NA
-## 11       NA     NA       NA       NA     NA
-## 12       NA     NA       NA       NA     NA
-## 13       NA     NA       NA       NA     NA
-## 14       NA     NA       NA       NA     NA
-```
-
----
-
-# Mutate and Chart
-
---
-
-* Often we need to make some changes to do some tidying before we can explore. 
-
---
-
-* Consider our interest in the distribution of service points won in a match 
-
---
-
-* First, the information has to be calculated from the count of first serve points won (1stWon) and second service points won (2ndWon) our of all service points (svpt)
-
---
-
-* Second, we have to put the information in long format because it is currently separated by column for winners and losers 
-
---
-
-* Third, some matches have missing stats
-
----
-
-# Mutate and Chart
-
-To tackle all these issues, we make a `serve_stats` dataset from filter, mutating, and reshaping our data.
-
-
-```r
-serve_stats &lt;- atp_matches %&gt;%
-    filter(!is.na(w_svpt)) %&gt;% # Filter out missing
-    dplyr::mutate(
-      winner.serve.won = (w_1stWon + w_2ndWon) / w_svpt,
-      loser.serve.won = (l_1stWon + l_2ndWon) / l_svpt
-    ) %&gt;%
-    tidyr::gather("winner", "serve.won", 
-                  winner.serve.won, loser.serve.won)
-```
-
----
-
-# Charting Service Points Won
-
-Now we are ready to graphically explore the characteristics of service points won:
-
-1. Overall
-
-2. By Win Status
-
----
-
-# Vertical and Horizontal Boxplots
-
-We can use `coord_flip` to control the direction of our boxplot summary. We can also use fill to control the colour of the box. 
-
-Here is the standard version.
-
-
-```r
-# Note we add a y-axix label when we have no grouping variable
-serve_stats %&gt;%
-  ggplot(aes(y = serve.won * 100, x = "All Players")) + 
-  geom_boxplot(fill = solarized_pal()(1)) + 
-  theme_bw() + 
-  scale_y_continuous("ATP Service Points Won") + 
-  scale_x_discrete("")
-```
-
----
-
-# Vertical and Horizontal Boxplots
-
-![](explore_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
-
-
----
-
-# Vertical and Horizontal Boxplots
-
-Here is the flipped version.
-
-
-```r
-serve_stats %&gt;%
-  ggplot(aes(y = serve.won * 100, x = "All Players")) + 
-  geom_boxplot(fill = solarized_pal()(1)) + 
-  theme_bw() + 
-  scale_y_continuous("ATP Service Points Won") + 
-  scale_x_discrete("") + 
-  coord_flip()
-```
-
----
-
-# Vertical and Horizontal Boxplots
-
-![](explore_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
-
----
-
-# Grouping by Win Status
-
-We can look at the difference in serve percentage won by win status by giving the group variable `winner` as the `x` aesthetic. We can also make nicer labels at the time of the function call.
-
-What does this comparison suggest?
-
-
-```r
-serve_stats %&gt;%
-  ggplot(aes(y = serve.won * 100, 
-             x = factor(winner, labels = c("loser", "winner")))) + 
-  geom_boxplot(fill = solarized_pal()(1)) + 
-  theme_bw() + 
-  scale_x_discrete("Player Group") + 
-  scale_y_continuous("ATP Service Points Won") 
-```
-
----
-
-# Grouping by Win Status
-
-![](explore_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
-
----
-
-# Multiple Variables
-
-* Multiple variables have many potential geoms that can be used for exploration.
-
-* Some key types are: `geom_point`, `geom_line`, `geom_smooth`.
-
-* Here we use the `geom_point` to look at trends in `minutes` by tournament date, excluding minute outliers.
-
-
-```r
-atp_matches %&gt;%
-  filter(!(minutes == 0 | minutes &gt; 10 * 60)) %&gt;% # Remove outliers
-	ggplot(aes(y = minutes, x = tourney_date)) + 
-	geom_point(size = 2) + # Increase point size
-	theme_bw()
-```
-
----
-
-# Multiple Variables
-
-
-![](explore_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
-
----
-
-# Smoothing Lines
-
-* We can add a smoothing line on top to see possible trends. This uses a `loess` smoother by default but that can be modified by request.
-
-* We can also customize the date scale using `scale_x_date`.
-
-
-```r
-atp_matches %&gt;%
-  filter(!(minutes == 0 | minutes &gt; 10 * 60)) %&gt;% # Remove outliers
-	ggplot(aes(y = minutes, x = tourney_date)) +
-  geom_smooth(col = alpha("grey", 0.5), fill = "grey", alpha = 0.5) + 
-	geom_point(size = 2) + # Increase point size
-  scale_x_date("Event Week", date_breaks = "3 week") +
-	theme_bw() + 
-  theme(axis.text.x = element_text(angle = 90))
-```
-
----
-
-# Smoothing Lines
-
-
-![](explore_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
-
-
----
-
-# Create Many Panels with Facet 
-
-How much does surface influence duration of matches? We can use faceting on `surface` to explore this. In what follows, we facet by row and make a separate colour for each surface but exclude `carpet` as a surface.
-
-
-```r
-atp_matches %&gt;%
-  filter(!(minutes == 0 | minutes &gt; 10 * 60), surface != "Carpet") %&gt;%
-	ggplot(aes(y = minutes, x = tourney_date, 
-	           col = surface, fill = surface)) +
-  facet_grid(surface ~ .) + # Facet by row with no column facet
-  geom_smooth() + 
-	geom_point(size = 2) + 
-  scale_color_tableau(name = "") + 
-  scale_fill_manual(name = "", 
-                    values = alpha(tableau_color_pal()(3), 0.5)) + 
-  scale_x_date("Event Week", date_breaks = "3 week") +
-	theme_bw() + 
-  theme(axis.text.x = element_text(angle = 90))
-```
-
----
-
-# Create Many Panels with Facet
-
-
-![](explore_files/figure-html/unnamed-chunk-23-1.png)&lt;!-- --&gt;
-
-
----
-
-# Practice: Graphing
-
-Use what we have explored so far to see what trends exist in service points won by month. 
-
-1. Use `lubridate` to create a `month` variable.
-
-2. Use the reshaped `serve_stats` dataset.
-
-3. Summarise the distribution by the median, 25th quantile and 75th quantile.
-
-4. Plot the summaries per month with `geom_pointrange`.
-
----
-
-# Solution: Graphing
-
-
-```r
-library(lubridate)
-
-serve_stats %&gt;%
-  dplyr::mutate(
-    month = month(tourney_date)
-  ) %&gt;%
-  group_by(month) %&gt;% # Summarise by month
-  dplyr::summarise(
-    median = median(serve.won) * 100,
-    low = quantile(serve.won, .25) * 100,
-    upper = quantile(serve.won, .75) * 100
-  ) %&gt;%
-	ggplot(aes(y = median, ymin = low, ymax = upper, x = month)) + 
-	geom_pointrange(size = 2, col = tableau_color_pal()(1)) + 
-  scale_x_continuous("Month") +
-  scale_y_continuous("Service Points Won") +
-	theme_bw() 
-```
-
----
-
-# Solution: Graphing
-
-
-![](explore_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
-
----
-
-# Charting Tracking Data
-
-* More and more sports are beginning to use tracking data
-
-* Tracking data refers to spatio-temporal data about events during a sporting event
-
-
----
-
-# Tracking Serves
-
-- Load the `atp_serves` dataset
-
-- It contains smooth functions for 66 men's serves to the Ad Court
-
-
-```r
-data(atp_serves)
-
-str(atp_serves)
-```
-
-```
-## 'data.frame':	132 obs. of  16 variables:
-##  $ serveid : int  1 1 2 2 3 3 4 4 5 5 ...
-##  $ x0      : num  -165.8 -100.8 -184.1 -75.3 128.6 ...
-##  $ x1      : num  141.5 80.9 212.5 60.4 -150.9 ...
-##  $ x2      : num  -26.56 -12.66 -82.63 -9.05 59.45 ...
-##  $ x3      : num  0 0 12.5 0 -9.43 ...
-##  $ y0      : num  32.8 19.1 35.69 9.56 -55.7 ...
-##  $ y1      : num  -29.83 -17.01 -47.5 -9.86 79.82 ...
-##  $ y2      : num  5.8 2.85 20.42 2.39 -36.89 ...
-##  $ y3      : num  0 0 -2.88 0 5.97 ...
-##  $ z0      : num  15.01 -48.8 10.89 -43.63 -2.04 ...
-##  $ z1      : num  -7.72 44.31 -5.15 39.81 13.56 ...
-##  $ z2      : num  -0.0409 -9.8393 0.7049 -8.785 -8.4759 ...
-##  $ z3      : num  0 0 -0.58 0 0.849 ...
-##  $ start   : num  1.53 1.92 1.45 1.86 1.32 ...
-##  $ duration: num  0.389 0.224 0.404 0.258 0.464 ...
-##  $ arc     : num  1 2 1 2 1 2 1 2 1 2 ...
-```
-
----
-
-# Smooth Positional Functions
-
-* Serve shots are described by two arcs
-
-* Each arc has 3 dimension that is summarised by a 3-degree polynomial
-
-* For, example, the `\(x\)` location at time `\(t\)` is:
-
-$$
-x(t) = x_0 + x_1 t + x_2 t^2 + x_3 t^3
-$$
-
----
-
-# Charting
-
-* So far, we have only considered two-dimensional charts.
-
-* For 3D data, we can use the package `plot3D`.
-
-* But first, we need to extract the (x, y, z) coordinates for each serve along a set of time points.
-
----
-
-# Function Writing
-
-First we write a function called `get_position` that takes the polynomial coefficients, start time, and end time and returns a data frame of 1000 positions and times, spread equally between the start and end times.
-
-
-```r
-get_position &lt;- function(a, b, c, d, t0, t1){
-
-	# Create positional function
-	g &lt;- function(t) c(a, b, c, d) %*% t^(0:3)
-	g &lt;- Vectorize(g)
-
-	times &lt;- seq(t0, t1, length = 1000)
-	
-data.frame(
-		position = g(times),
-		seconds = times
-	)
-}
-```
-
----
-
-# Functional Programming
-
-We can use the package `purrr` and the function `map_df` to transform our serve polynomials into positional data. Here is the basic syntax for `map`.
-
-
-```r
-purrr:map(data, function)
-```
-
-* We can also use `~function` to create anonymous functions.
-
-* You can call variables in data symbolically with `.x$var`.
-
-
----
-
-# Example: Mapping to Get Positions
-
-Let's see an example of how we can use `map` with `get_positions` to expand our polynomials into (x, y, z) positional coordinates. We use `map_df` because we want to have a data frame in long format.
-
-
-```r
-library(purrr) # Load purrr
-
-# Create a row id variable
-atp_serves$id &lt;- interaction(atp_serves$serveid, atp_serves$arc)
-
-x_position &lt;- atp_serves %&gt;%
-	split(.$id) %&gt;%
-	map_df(
-		~ get_position(.x$x0, .x$x1, .x$x2, .x$x3, 
-		               .x$start, .x$start + .x$duration)
-	)
-
-x_position[1:10,]
-```
-
----
-
-# Example: Mapping to Get Positions
-
-```
-##     position  seconds
-## 1  -11.39293 1.532434
-## 2  -11.36955 1.532823
-## 3  -11.34617 1.533213
-## 4  -11.32280 1.533602
-## 5  -11.29944 1.533991
-## 6  -11.27608 1.534381
-## 7  -11.25274 1.534770
-## 8  -11.22940 1.535159
-## 9  -11.20607 1.535549
-## 10 -11.18275 1.535938
-```
-
----
-
-# Practice: Mapping to Get Positions
-
-1. Repeat the same map steps to get the `y` and `z` positions.
-
-2. Create data frames `y_position` and `z_position` to store these positions data.
-
-
----
-
-# Solution: Mapping to Get Positions
-
-
-
-```r
-y_position &lt;- atp_serves %&gt;%
-	split(.$id) %&gt;%
-	map_df(
-		~ get_position(.x$y0, .x$y1, .x$y2, .x$y3, 
-		               .x$start, .x$start + .x$duration)
-	)
-
-z_position &lt;- atp_serves %&gt;%
-	split(.$id) %&gt;%
-	map_df(
-		~ get_position(.x$z0, .x$z1, .x$z2, .x$z3, 
-		               .x$start, .x$start + .x$duration)
-	)	
-```
-
----
-
-# Prepare for Plotting
-
-Next, we combine the positional data, assign the id for the serve that includes both arcs, and sort by seconds.
-
-
-```r
-# Combine
-positions &lt;- data.frame(
-	seconds = x_position$seconds,
-	x = x_position$position,
-	y = y_position$position,
-	z = z_position$position,
-	id = str_replace(rep(sort(atp_serves$id), each = 1000), 
-	                 "(.*)(\\..*)", "\\1")
-)
-
-# Convert to numeric for colvar
-positions$id &lt;- as.numeric(positions$id)		
-
-# Sort
-positions  &lt;- positions[order(positions$id, positions$seconds),]
-
-positions[1:10,]
-```
-
----
-
-# Prepare for Plotting
-
-
-```
-##     seconds         x         y        z id
-## 1  1.532434 -11.39293 0.7152673 3.089983  1
-## 2  1.532823 -11.36955 0.7105796 3.086929  1
-## 3  1.533213 -11.34617 0.7058936 3.083875  1
-## 4  1.533602 -11.32280 0.7012094 3.080821  1
-## 5  1.533991 -11.29944 0.6965270 3.077767  1
-## 6  1.534381 -11.27608 0.6918463 3.074713  1
-## 7  1.534770 -11.25274 0.6871674 3.071659  1
-## 8  1.535159 -11.22940 0.6824902 3.068605  1
-## 9  1.535549 -11.20607 0.6778148 3.065551  1
-## 10 1.535938 -11.18275 0.6731411 3.062497  1
-```
-
----
-
-# 3D Plots
-
-* We have all the information we need to plot the serve trajectories in 3 dimensions. 
-
-* The `plot3D` package provides a suite a functions for 3D plots: `points3D`, `lines3D`, `ribbon3D`, etc. 
-
-* You can install with `install.packages('plot3D')`
-
-
----
-
-# Plot3D Key Arguments
-
-In addition to the basic variables `x`, `y`, `z`, here are some useful arguments when working with `plot3D`.
-
-<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
-<thead>
-<tr>
-<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Argument</th>
-<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>colvar</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Numeric group variable for coloring points</td>
-</tr>
-<tr style='background-color: #f7f7f7;'>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>phi</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Angle defining colatitude</td>
-</tr>
-<tr>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>theta</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Angle defining azimuthal direction</td>
-</tr>
-<tr style='background-color: #f7f7f7;'>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>col</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Colors to use with colvar</td>
-</tr>
-<tr>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>bty</td>
-<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>Style for the perspective box</td>
-</tr>
-</tbody>
-</table>
-
----
-
-# Plotting Serves
-
-In this chart, we plot all serves using the `points3D`. We set `theta` to 0 so that we look perpendicularly along the length of the court.
-
-
-```r
-library(plot3D) # Load plot3D
-
-points3D(
-	x = positions$x,
-	y = positions$y,
-	z = positions$z,
-	colvar = positions$id,
-	theta = 0
-)
-```
-
----
-
-# Plotting Serves
-
-
-![](explore_files/figure-html/unnamed-chunk-32-1.png)&lt;!-- --&gt;
-
-
-
----
-
-# Practice: 3D Plotting
-
-In the previous plot, it was difficult to see the serves because we had serves emanating from both the left and right-side of the court. 
-
-1. Add a variable to the dataset that indicates what side a serve starts from
-
-2. Restrict the plot to the serves on the negative side
-
-
----
-
-# Solution: 3D Plotting
-
-
-
-```r
-positions &lt;- positions %&gt;%
-    group_by(id) %&gt;%
-    dplyr::mutate(
-      negative = x[1] &lt; 0
-    )
-
-points3D(
-	x = positions$x[positions$negative],
-	y = positions$y[positions$negative],
-	z = positions$z[positions$negative],
-	colvar = positions$id[positions$negative],
-	theta = 0
-)
-```
-
----
-
-# Solution: 3D Plotting
-
-
-
-![](explore_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
-
----
-
 # Summary
 
---
+- Using common tools for data manipulation and graphics we have investigated 3 commonly held views in tennis
 
-- Exploring our data is one of the most interesting parts of data analysis
-
---
-
-- But we need to be familiar with our variables and have specific questions to explore efficiently
-
---
-
-- Most of the counting and summarising we need can be done with `dplyr`
-
---
-
-- For graphing, `ggplot2` will take us very far and `plot3D` can give us an extra dimension to work with, when that is of interest.
+- Our observations provide support for only 1 of these 3 beliefs: the advantage of serving first
 
 ---
 

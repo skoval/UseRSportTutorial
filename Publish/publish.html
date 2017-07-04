@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Publishing</title>
+    <title>Blogging</title>
     <meta charset="utf-8">
     <link href="libs/remark-css/example.css" rel="stylesheet" />
     <link rel="stylesheet" href="talk.css" type="text/css" />
@@ -10,7 +10,7 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Publishing
+# Blogging
 ## Sharing Your Work with the World
 
 ---
@@ -19,32 +19,51 @@ class: center, middle, inverse, title-slide
 
 
 
+
 class: slide-img
 
-# Publishing
+# Why Blog?
 
-### One of the most popular and efficient ways of sharing analysis in sports is through *blogging*.
+Sharing your ideas with the world is one of the most joyful parts of sports analysis.
 
 &lt;div align="center"&gt;
-&lt;img src="big-data-and-sports.jpg" width=80%&gt;
+&lt;img src="serena-joy.gif" width=100%&gt;
 &lt;/div&gt;
+
 
 ---
 
+
+class: slide-img
+
+# 'On The T' Powered By Blogdown
+
+[on-the-t.com](http://on-the-t.com/)
+
+![](on-the-t.png)
+
+---
+
+
 # Getting There
 
---
-
+.left[
 - Starting a blog might seem overwhelming but, if you know `R` and some basic CSS, it's easy
 
---
 
 - Producing interesting content is the tough part about blogging
 
---
 
 - `R` helps to let you focus on _content_ by providing easy-to-use tools that solve the technical details of going from code to the Web 
 
+- _If you can write R markdown, you can create a blog!_
+]
+
+.right[
+&lt;div align="center"&gt;
+&lt;img src="harry_potter.gif" width=90%&gt;
+&lt;/div&gt;
+]
 
 ---
 
@@ -60,7 +79,7 @@ class: slide-img
 
 --
 
-* Generate site with `Hugo`
+* Generate site with `Hugo`, a static site generator
 
 --
 
@@ -70,26 +89,6 @@ class: slide-img
 
 * Authored by Yihui Xie (who is at the conference!)
 
-
----
-
-# What is Hugo?
-
-.cbox[
-Hugo is a static Web site generator with heaps of custom themes that make it simple to create a beautiful site.
-]
-
---
-
-&lt;br&gt;
-
-* Hugo works with any operating system in the same way
-
-* It handles many pages of content efficiently
-
-* Hugo (like `R`) also has a very active user community
-
-* *However* Hugo is intended only for static sites were HTML content is fixed no matter what the user behavior
 
 ---
 
@@ -143,209 +142,47 @@ Here are the major functions you will use with `blogdown`.
 
 ---
 
-# Example Workflow
+# Learning the Workflow
 
-1. Create a repo for your blog on Github (you need to have an account). Here is my example:
+Yihui and Amber Thomas have a draft manual for using blogdown that will [get you started](https://bookdown.org/yihui/blogdown/).
 
-&lt;div align="center"&gt;
-&lt;img src="github.png" width=80%&gt;
-&lt;/div&gt;
+![](blogdown.png)
 
 ---
 
-# Example Workflow
+# Worklow Overview
 
+1. Install `blogdown` and run `install_hugo`
 
-2. Choose a directory for your repo and clone it there. Here, I put my repo under the path `/Software`:
+2. Use `new_site` to create your site directory
 
-&lt;br&gt;
+3. Setup your directory with `git` and push to `github`
 
-![](terminal.png)
+4. Choose your own theme choosing from [themes.gohugo.io](http://themes.gohugo.io/) and use `install_theme`
 
----
+5. Configure your site by modifying `config` file
 
-# Set Server Daemon
+6. Create new pages with `new_post`
 
---
-
-- By default, when running your site locally, your `R` session will be blocked
-
---
-
-- To prevent this, you can use change your options `options(servr.daemon = FALSE)`
-
---
-
-- You can do this at the start of each blogging session 
-
---
-
-- _Or_ fix it permanently in your `.Rprofile` file
-
----
-
-# Example Workflow
-
-
-3. In `R`, load `blogdown`
-
-4. Install Hugo
-
-5. `setwd` into the repo directory and create a new site
-
-
-```r
-library(blogdown)
-
-install_hugo() # On a Mac you need homebrew
-
-options(servr.daemon = FALSE) # If not in Rprofile
-
-# setwd() to blog directory
-
-new_site()
-```
-
----
-
-# Starting Site
-
-You should see a browser open with the following default layout:
-
-![](site_page.png)
-
-
----
-
-# Site Folders
-
-Also, if you look under your blog repo, you will see that a number of new folders were created. These are all the elements needed to get your site up and running.
-
-![](site-folders.png)
-
----
-
-
-# Choosing a New Theme
-
-
-* The default theme for the site is `Lithium`
-
-* To set your own style, you can choose from hundreds of other themes
- at [themes.gohugo.io](http://themes.gohugo.io/) 
- 
-* When you find one you like you can add it to your site with `install_theme`
-
-&lt;div align="center"&gt;
-&lt;img src="hugo_themes.png" width=50%&gt;
-&lt;/div&gt;
-
-
----
-
-# Example: Install Theme
-
-In this example, I add theme `mainroad`:
-
-
-```r
-install_theme('vimux/mainroad',
-	theme_example = TRUE, 
-	update_config = TRUE
-)
-```
-
----
-
-# Example: Install Theme
-
-I can preview the site with the `serve_site`. Here is what the new theme looks like:
-
-![](mainroad.png)
-
-
----
-
-# Configuring Site
-
-In your blog repo, you will see a `config.toml` file. This is where you can update the elements on your main page (which will be `index.html`). Below I've highlighted some fields to update with the `Mainroad` config file.
-
-&lt;div align="center"&gt;
-&lt;img src="config.png" width=80%&gt;
-&lt;/div&gt;
-
-
----
-
-# New Configuration 
-
-![](config-update.png)
-
----
-
-# Updated Site
-
-![](site-updates.png)
-
----
-
-# Creating New Post
-
-You can generate new posts in R markdown (or markdown) files using `new_post`. Here is an example.
-
-
-```r
-new_post(
-	title = "French Open 2017",
-	kind = "default"
-)
-```
-
----
-
-# Creating a New Post
-
-This will open an editor, where you can enter any additional meta-data and start to create content, just like you would with `R` markdown.
-
-![](new-post.png)
-
----
-
-# Location of New Post
-
-The post will exist under the `content/post` folder.
-
-![](new-post-file.png)
-
----
-
-# Site Update
-
-If you have your interactive session open, the site will automatically update with the post.
-
-![](new-post-server.png)
-
----
-
-# Deploying
-
-1. When you are ready to publish your site, you can use the `build_site(local = FALSE)` function, which compiled Rmd and runs Hugo to prepare your site for publication.
-
-2. You will need to select a service for hosting your site. There are many options, like:
-  - [Netlify](https://www.netlify.com/)
-  - [Github IO](https://pages.github.com/)
-  - [Updog](https://updog.co/)
-  
-3. When you have a domain, you will need to update `baseurl` in your config before running `build_site`.
+7. _Deploy!_
 
 ---
 
 # Adding Interactive Graphics
 
+.left[
 - All sports blogs should use charts! And you can make your blog charts especially interesting by making them interactive.
 
 - For `R` users who already masters of `ggplot2`, the `plotly` package is a flexible and fast way to create interactive Web graphics
+]
 
+.right[
+&lt;div&gt;
+    &lt;a href="https://plot.ly/~on-the-t/1221/?share_key=ZjcORFd1wz33fmAeDoXSNe" target="_blank" title="women_2017_french_open_seeds" style="display: block; text-align: center;"&gt;&lt;img src="https://plot.ly/~on-the-t/1221.png?share_key=ZjcORFd1wz33fmAeDoXSNe" alt="women_2017_french_open_seeds" style="max-width: 100%;width: 700px;"  width="400" onerror="this.onerror=null;this.src='https://plot.ly/404.png';" /&gt;&lt;/a&gt;
+    &lt;script data-plotly="on-the-t:1221" sharekey-plotly="ZjcORFd1wz33fmAeDoXSNe" src="https://plot.ly/embed.js" async&gt;&lt;/script&gt;
+&lt;/div&gt;
+
+]
 
 ---
 
@@ -386,7 +223,6 @@ Further customization can be done on the plotly site.
 
 ![](plotly-example.png)
 
-
 ---
 
 # Plotly Embed
@@ -397,18 +233,23 @@ Under the `Share` link you can also find the code that you can use to embed your
 
 ---
 
+class: slide-img
+
 # Summary
 
-&lt;br&gt;
+.left[
+* Doing sports analytics requires a lot of skills
 
---
+* Many tools in `R` can make capturing, cleaning, and analyzing data much easier
 
-- With `blogdown` and `Hugo` we can build a blog site and create new posts with `R` markdown
+* I hope much of what you have seen in this presentation will help you make your ideas about sports data into a reality 
+]
 
---
-
-- Interactive charts can be created with `ggplot` and `plotly` and embedded in our posts with an HTML `iframe`
-
+.right[
+&lt;div align="center"&gt;
+&lt;img src="rafa_grit.gif" width=90%&gt;
+&lt;/div&gt;
+]
 
 ---
 

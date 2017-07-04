@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Modelling</title>
+    <meta charset="utf-8">
+    <link href="libs/remark-css/example.css" rel="stylesheet" />
+    <link rel="stylesheet" href="talk.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Modelling
+## Predictive Data Analysis in R
+
+---
+
+
+
+
+
+class: slide-img
+
+# Sport Prediction
+
+
+.left[
+![](crystal_ball.gif)
+]
+
+.right[
+### Predicting _who will win_ is the holy grail of sports analytics and is a major research area of interest for sports statisticians.
+]
+
+
+---
+
+# Descriptive vs Predictive Models
+
+--
+
+*  _Predictive modeling_ usually refers to machine learning  
+
+--
+
+* The goal of these techniques is to improve predictive performance
+
+--
+
+* This is a very different goal from statistical models, like regression, where inference and interpretation are of primary importance
+
+--
+
+* Predictive models will often sacrifice interpretability for improved performance
+
+
+---
+
+# Describe Before You Predict
+
+* Because it is often a challenge to interpret the "how" of machine learning methods, it is good practice to first do some statistical modelling (e.g. `glm(y ~ x + ...)`)
+
+* The reasons for this include:
+
+  - Getting familiar with the interrelationships in your data 
+  
+  - Identifying any issues not flagged during EDA
+  
+  - Developing some expectations for the predictive modelling results
+
+
+---
+
+# Predictive Modelling with `caret`
+
+.left[
+* Once you are ready to develop your prediction model, the `caret` package, written by Max Kuhn, is a great resource for machine learning in `R`
+
+* `caret` stand for Classification And REgression Training 
+
+* It includes 100+ predictive modelling methods
+
+* It provides a unified &amp; streamlines interface for building and evaluating models
+
+* It allows parallel processing for faster computation
+
+* You can install with `install.packages('caret')`
+]
+
+.right[
+&lt;div align="center"&gt;
+&lt;img src="applied_caret.jpg" width=80%&gt;
+&lt;/div&gt;
+]
+
+---
+
+# Modelling Steps
+
+--
+
+Step 1. Decide how to spend your data
+
+--
+
+Step 2. Split the data into training and test
+
+--
+
+Step 3. Conduct pre-processing (as needed)
+
+--
+
+Step 4. Train the model with resampling
+
+--
+
+Step 5. Evaluate the model with test data
+
+---
+
+
+# Why Split Up the Data at All?
+
+- Testing our data on independent samples is the strongest form of validation and evaluation
+
+- If we trained and tested on the same data, we risk _overfitting_ which is the machine-learning equivalent to a "Monday morning quarterback"
+
+- We also resample among training for additional protection against overfitting
+
+![](armchair-quarterback.jpg)
+
+---
+
+# Using `createDataPartition`
+
+We can use `createDataPartition` to split our data:
+
+
+```r
+createDataPartition(y, times, p, list, ...)
+```
+
+&lt;br&gt;
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Argument</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>y</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Outcome vector to balance sampling on</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>times</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Number of partitions</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>p</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Proportion of each partition allocated to training</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;'>list</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; border-bottom: 2px solid grey; text-align: left;'>Logical whether list is returned</td>
+</tr>
+</tbody>
+</table>
+
+*Note:* Using 70% of our data for training is typical
+
+---
+
+# Example: Partitioning Data
+
+In this example, we create one partition with 70% of our dataset allocated to training.
+
+
+
+
+```r
+library(caret) # Load caret
+
+# Returns matrix of indices for obs in training
+train &lt;- createDataPartition(
+  y = data$outcome,
+  times = 1,
+  p = 0.7,
+  list = F
+)
+```
+
+---
+
+# Practice: Using CreateDataPartition
+
+Modify the previous code to obtain 5 partitions for your training samples with 60% of observeations in each devoted to training.
+
+--
+
+&lt;br&gt;
+
+_Answer:_
+
+
+
+```r
+train &lt;- createDataPartition(
+  y = data$outcome,
+  times = 5,
+  p = 0.6,
+  list = F
+)
+```
+
+---
+
+
+# Pre-Processing
+
+.cbox[
+Before we split our data, we need to pre-process our data. The pre-processing can protect against some loss in model accuracy due to scale, skew, or high correlation.
+]
+
+&lt;br&gt;
+
+Common pre-processing steps are:
+
+1. Centering - Give all variables a common mean of 0
+
+2. Standardizing - Give all variables a common scale
+
+3. Remove highly correlated variables
+
+4. Reduce dimension (when `\(n \sim p\)`)
+
+---
+
+# The `train` Function
+
+The main workhouse function for model training in `caret` is `train`. Here are the main arguments you need to know to get started.
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Argument</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>form</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Formula (y ~ x)</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>data</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Data frame of training data</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>method</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Character of the ML method to be used</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>metric</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Performance metric for summarizing</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>tuneLength</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Sets granularity for tuning parameter if tuneGrid not specified</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>trControl</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Control parameters for training</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>tuneGrid</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>Data frame that gives explicit range for tuning parameters</td>
+</tr>
+</tbody>
+</table>
+
+---
+
+# Practice: Pre-Processing
+
+What function would you use to standardize your model features?
+
+--
+
+&lt;br&gt;
+
+_Answer:_ The `scale` function
+
+---
+
+
+# Training Control
+
+* The `trControl` argument is a list that controls a number of aspects of training including resampling and how we summarise performance with each resample.
+
+* The resampling is an important additional measure to protect against overfitting when training 
+
+
+&lt;div align="center"&gt;
+&lt;img src="resampling.png" width=75%&gt;
+&lt;/div&gt;
+
+
+---
+
+# Example: Using `trControl`
+
+In our example, we will use `trControl` to use 5-fold cross validation and a two-class summary for our performance measures.
+
+
+```r
+ctrlSpecs &lt;- trainControl(
+	method = "repeatedCV",
+	repeats = 5,
+	summaryFunction = twoClassSummary, # function from caret
+	classProbs = TRUE # Needed to use twoClassSummary
+)
+```
+
+
+---
+
+# Grid Tuning
+
+* The `tuneGrid` is a way to give a specific grid for the tuning parameters of the method
+
+* You can use `expand.grid` to make a range of parameters
+
+* To determine the parameters to tune and their variable names you can use `getModelInfo`
+
+---
+
+# Using `getModelInfo`
+
+* We can get a model of interest with `getModelInfo('model')` or get info from all models with `getModelInfo()`.
+
+* This returns a list per model with information about the model type, parameters, grid function, etc.
+
+* Here is an example with the `rpart` model.
+
+
+```r
+getModelInfo('rpart')[['rpart']][1:4]
+```
+
+```
+## $label
+## [1] "CART"
+## 
+## $library
+## [1] "rpart"
+## 
+## $type
+## [1] "Regression"     "Classification"
+## 
+## $parameters
+##   parameter   class                label
+## 1        cp numeric Complexity Parameter
+```
+
+---
+
+# Performance Metrics
+
+* We can use the `metric` argument to choose our performance metric for training evaluation
+
+* There are many metrics for evaluating classification. In general, it is best to choose one when choosing among model approaches
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Metric</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Accuracy</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Proportion of exactly correct classifications</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>AUC</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>Area under the ROC curve</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>Sensitivity</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; text-align: left;'>The true positive rate (also called 'recall')</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>Specificity</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; background-color: #f7f7f7; text-align: left;'>The true negative rate</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; border-bottom: 2px solid grey; text-align: left;'>LogLoss</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%;width:40%; border-bottom: 2px solid grey; text-align: left;'>Prediction-weighted loss function</td>
+</tr>
+</tbody>
+</table>
+
+---
+
+# Setting Performance Metric
+
+There is no one correct performance measure. In fact, multiple should be evaluated when testing. For training, the "log loss" is good all around measure. Here is how we can set our control specs to use it.
+
+
+```r
+ctrlSpecs &lt;- trainControl(
+	method = "repeatedCV",
+	repeats = 5,
+	summaryFunction = mnLogLoss,
+	classProbs = TRUE
+)
+```
+
+---
+
+# Practice: Alternative Resampling
+
+Look at the `method` options using the documentation on `trainControl`. Find an alternative resampling approach and modify the `ctrlSpecs` object to use this method.
+
+--
+
+&lt;br&gt;
+
+In this alternative we use 10 bootstrap resamples:
+
+
+
+```r
+ctrlSpecs &lt;- trainControl(
+	method = "boot",
+	repeats = 10,
+	summaryFunction = mnLogLoss,
+	classProbs = TRUE
+)
+```
+
+---
+
+# Models
+
+There are more than 100 models to try in `caret`! Below is just a sample of some popular kinds. The full list is available with the online [caret book](http://topepo.github.io/caret/available-models.html). 
+
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Category</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Description</th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Forest</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>Ensemble of multiple decision trees with bagging (boostrap aggregation)</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; text-align: left;'>rf, rfRules, cforest</td>
+</tr>
+<tr style='background-color: #f7f7f7;'>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Boosted</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>Incremental building of multiple classifiers, which is a kind of correlated ensembling</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; background-color: #f7f7f7; text-align: left;'>gbm, adaboost, C5.0</td>
+</tr>
+<tr>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>Support Vector Machines</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>Collection of regression lines that try to maximally separate classes</td>
+<td style='padding-left: 5%; padding-right:0%; padding-top: 2%;padding-bottom: 2%; border-bottom: 2px solid grey; text-align: left;'>svmLinear, svmRadial</td>
+</tr>
+</tbody>
+</table>
+
+---
+
+# Random Forest
+
+Let's have a look at each category and how we could train each in `caret`. Below we use the `rf` method to fit a random forest. The `tuneLength` is set to 10 to have a randomly generated grid for the forest parameters.
+
+
+```r
+rfFit &lt;- train(
+	outcome ~ .,
+	data = trainingData,
+	method = "rf",
+	tuneLength = 10,
+	trControl = ctrlSpecs,
+	metric = "logLoss"
+)
+```
+
+---
+
+# Practice: Grid Tuning
+
+Use `getModelInfo` to find the tuning parameters for the `rf` method. Create a data frame with 10 different options and modify the `train` function to use these in place of the random tuning with `tuneLength`.
+
+--
+
+
+```r
+# Find tuning parameters
+getModelInfo("rf")[["rf"]]$parameters
+```
+
+```
+##   parameter   class                         label
+## 1      mtry numeric #Randomly Selected Predictors
+```
+
+
+```r
+grid &lt;- data.frame(.mtry = seq(5, 25, length = 10))
+
+# Modify train function
+rfFit &lt;- train(
+	outcome ~ .,
+	data = trainingData,
+	method = "rf",
+	tuneGrid = grid,
+	trControl = ctrlSpecs,
+	metric = "logLoss"
+)
+```
+
+---
+
+# Evaluate the Model
+
+--
+
+* We can see preformance metrics across the different tuning parameters using: `print` or `plot`
+
+--
+
+* Also, the selected model can be extracted with `finalModel` and it will have all the class properties of the source method
+
+--
+
+For example, with a random forest, we can look at feature importance:
+
+
+```r
+library(randomForest) # Class methods for RF
+
+importance(rfFit$finalModel) # Variable importance
+```
+
+
+---
+
+# Resources
+
+
+* [Web book on caret](http://topepo.github.io/caret/index.html)
+
+
+* [Applied Predictive Modeling](https://www.amazon.com/dp/1461468485?tag=inspiredalgor-20) 
+
+* [Introduction to Statistical Learning](https://www.amazon.com/dp/1461471397?tag=inspiredalgor-20)
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {window.dispatchEvent(new Event('resize'));});</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+  }
+});
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

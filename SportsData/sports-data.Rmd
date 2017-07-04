@@ -1,6 +1,6 @@
 ---
 title: "Sports Analytics with R"
-subtitle: "2017 Melbourne Data Science Week"
+subtitle: "UseR! Conference 2017"
 author: "Stephanie Kovalchik"
 date: ""
 output:
@@ -37,25 +37,21 @@ library(htmlTable)
 
 # Tutorial Resources
 
-- Course package: [WOMBATsport](https://github.com/skoval/WOMBATsport)
+- Course package: [deuce](https://github.com/skoval/deuce)
 
-- Course tutorial: [WOMBATtutorial](https://github.com/skoval/WOMBATtutorial)
+- Course tutorial: [UseRSportTutorial](https://github.com/skoval/UseRSportTutorial)
 
 - Contact: [s.a.kovalchik@gmail.com](s.a.kovalchik@gmail.com)
 
 ---
 
-.hbox[
-### Sports Data and Packages: <br> The Numbers and Tools for Sports Analysis
-]
 
----
+# What It's Like to Be a Sports Statistician
 
-# Tutorial Outline
+.left[
+- Finding sports data
 
-- Sports data
-
-- Scraping sports data
+- Web scraping sports data
 
 - Data wrangling
 
@@ -63,7 +59,19 @@ library(htmlTable)
 
 - Predictive modelling
 
-- Blog publishing
+- Blogging
+]
+
+.right[
+![](halep_excited.gif)
+]
+
+---
+
+
+.hbox[
+## Finding Sports Data
+]
 
 ---
 
@@ -72,19 +80,11 @@ class: slide-img
 
 # Popular Types of Sports Data
 
---
-
 - Box Scores
-
---
 
 - Performance Metrics
 
---
-
 - Tracking Data
-
---
 
 - Wearable Data
 
@@ -97,7 +97,7 @@ class: slide-img
 A 'box score' is a generic term for the summary statistics reported about a single sporting event.
 
 <div align="center">
-<img src="1876boxscore.jpg" width=70%>
+<img src="1876boxscore.jpg" width=60%>
 </div>
 
 .footnote[
@@ -110,17 +110,13 @@ class: slide-img
 
 # Performance Metrics
 
-.left[
-- Player or team stats
+Performance metrics are usually repeated measures of team or players that are derived from historical box scores. 
 
-- Usually include multiple games
+<br>
 
-- Longitudinal/time series
-]
-
-.right[
-![](tennis-performance-metrics.png)
-]
+<div align="center">
+<img src="tennis-performance-metrics.png" width=80%>
+</div>
 
 ---
 
@@ -128,7 +124,7 @@ class: slide-img
 
 # Tracking Data
 
-'Tracking data' describes spatial temporal data of objects in a sporting event.
+'Tracking data' is spatio-temporal data of objects in a sporting event.
 
 <br>
 
@@ -143,183 +139,276 @@ class: slide-img
 
 # Wearables
 
-'Wearables' are technologies that collect data about athletes when worn. Biometrics and movement are two common types of data collected.
+.left[
+- 'Wearables' are technologies that collect data about athletes when worn. 
+
+- Biometrics and movement are two common types of data collected.
+]
+
+.right[
+<div align="center">
+<img src="afl_kick.jpg" width=80%>
+</div>
+]
+
+.footnote[
+[1] VU Biomechanics Lab
+]
+
+---
+
+class: slide-img
+
+# Data Availability Curve
+
+Sadly, not all types of sports data are equally available though the steepness of the curve depends on the particular sport.
+
+<div align="center">
+<img src="data_availability.png" width=70%>
+</div>
+
+---
+
+class: slide-img
+
+.left[
+```{r echo = F}
+data <- data.frame(
+  Category = c("<b>Multiple</b>", rep("", 3),
+               "<b>American Football</b>", rep("", 5),
+               "<b>Baseball</b>", rep("", 17),
+               "<b>Basketball</b>", rep("", 12)),
+  URL = c(
+    "www.databaseSports.com",
+    "www.opensourcesports.com",
+    "http://www.espn.com.au/blog/statsinfo",
+    "http://www.masseyratings.com/data.php",
+    "http://www.bballsports.com/",
+    "http://www.cfbstats.com/blog/college-football-data/",
+    "http://www.databaseFootball.com/",
+    "http://www.nfl.com/stats/player",
+    "http://www.pro-football-reference.com",
+    "http://stats.washingtonpost.com/cbk/teams.asp",
+    "http://www.baseball-almanac.com/teamstats/statmaster.php",
+    "http://www.baseballamerica.com/statistics/",
+  "http://www.baseballheatmaps.com/graph/distanceleader.php",
+  "http://www.baseballmusings.com/cgi-bin/DayByDayDatabase.py",
+  "http://www.baseballprospectus.com/sortable/",
+  "http://www.baseball-reference.com",
+  "http://baseballguru.com/battingdatabase.html",
+  "http://www.bballsports.com/",
+  "http://www.databasebaseball.com",
+  "http://www.dougstats.com/",
+  "http://www.fangraphs.com/",
+  "http://www.hittrackeronline.com/index.php",
+  "http://www.baseball-links.com/",
+  "http://www.retrosheet.org",
+  "http://www.sabr.org/",
+  "http://www.seanlahman.com/",
+  "http://www.statcorner.com/",
+  "http://www.thebaseballcube.com/",
+  "http://www.82games.com/",
+  "http://www.apbr.org/",
+  "http://www.basketball-reference.com/",
+  "http://www.basketballvalue.com/",
+  "http://www.bballsports.com/",
+  "http://www.nba.com/statistics/index.html",
+  "http://www.databasebasketball.com/",
+  "http://www.dougstats.com/",
+  "http://www.finalfour.net/",
+  "http://www.hoopdata.com/",
+  "http://www.kenpom.com/",
+  "http://www.ncaa.org/",
+  "http://stats.washingtonpost.com/nba/"
+  )
+)
+
+htmlTable(data, 
+          rnames = F, 
+          align = c("cl"),
+          col.rgroup = 
+           rep(c("#eeeeee", "#e5f7f7", "#eeeeee", "#e5f7f7"), c(4, 6, 18, 13)),
+          css.cell = "font-size:11px;",
+          css.table = "margin-left:-1em; margin-bottom:1em;")
+```
+]
+
+.right[
+```{r echo = F}
+data <- data.frame(
+  Category = c(
+               "<b>Hockey</b>", rep("", 9),
+               "<b>Soccer</b>", rep("", 7),
+               "<b>Other</b>", rep("", 9)),
+  URL = c(
+
+  "https://puckalytics.com",
+  "http://www.bballsports.com/",
+  "http://www.databasehockey.com/",
+  "http://stats.hockeyanalysis.com/",
+  "http://www.hockey-reference.com/",
+  "http://www.hockeydb.com/",
+  "http://www.nhlpa.com/stats/league-wide",
+  "http://www.nhl.com/ice/statshome.htm",
+  "http://www.quanthockey.com/",
+  "http://stats.washingtonpost.com/nhl/teams.asp",    
+  "http://www.football-data.co.uk/",
+  "http://www.football-data.co.uk/data.php",
+  "http://soccerway.com",
+  "http://www.squawka.com/",
+  "http://www.statto.com/football/stats",
+  "http://www.transfermarkt.com/",
+  "http://www.whoscored.com/",
+  "http://www.worldcup.com/",
+  "http://www.uci.ch/",
+  "http://www.espncricinfo.com/",
+  "http://www.databasegolf.com/",
+  "http://www.tennisabstract.com/",
+  "http://www.databaseSports.com/olympics",
+  "http://www.rugbydata.com/",
+  "http://www.afl.com.au/stats",
+  "http://www.volleyball.org/",
+  "http://www.databaseracing.com/",
+  "http://games.crossfit.com/leaderboard"
+  )
+)
+
+htmlTable(data, 
+          rnames = F, 
+          align = c("cl"),
+          col.rgroup = 
+            rep(c("#eeeeee", "#e5f7f7", "#eeeeee"), c(10, 8, 10)),
+          css.cell = "font-size:11px;",
+          css.table = "margin-left:4em; margin-bottom:1em;")
+```
+]
+
+---
+
+class: slide-img
+
+# Case Studies
+
+Navigating sports sites and finding where data lives can sometimes be tricky. Let's get some practice by inspecting the following sites. For each case, determine where the main data lives, what type is there, and in what format.
 
 <br>
 
-<div align="center">
-<img src="bigfooty.jpg" width=80%>
-</div>
+1. [http://www.hockeydb.com/](http://www.hockeydb.com/) 
 
-
----
-
-class: slide-img
-
-# Resources: Multiple Sports
-
-  * [databaseSports](www.databaseSports.com)
-  
-  * [Open Source Sports](www.opensourcesports.com)
-  
-  * [ESPN Stats Info](http://www.espn.com.au/blog/statsinfo)
-  
-  * [Massey Ratings](http://www.masseyratings.com/data.php)
+2. [http://www.football-data.co.uk/data.php](http://www.football-data.co.uk/data.php) 
 
 ---
 
-class: slide-img
+# Answer: Hockey Database
 
-# Resources: American Football
+These data are under the 'Statistics' page and primarily exist as HTML tables.
 
-  - [BBALLsports.com](http://www.bballsports.com/)
-  - [College Football Statistics](http://www.cfbstats.com/blog/college-football-data/)
-  - [databaseFootball.com](http://www.databaseFootball.com/)
-  - [databaseFootball.com/College](http://www.databaseFootball.com/College)
-  - [NFL Statistics](http://www.nfl.com/stats/player)
-  - [Pro-football Reference](http://www.pro-football-reference.com)
-  - [Washingtonpost.com](http://stats.washingtonpost.com/cbk/teams.asp)
-  
----
-
-class: slide-img
-
-# Resources: Baseball
-  
-.left[
-- [Baseball Almanac](http://www.baseball-almanac.com/teamstats/statmaster.php)
-- [Baseball America](http://www.baseballamerica.com/statistics/)
-- [Baseball Heat Maps](http://www.baseballheatmaps.com/graph/distanceleader.php)
-- [Baseball Musings](http://www.baseballmusings.com/cgi-bin/DayByDayDatabase.py)
-- [Baseball Prospectus](http://www.baseballprospectus.com/sortable/)
-- [Baseball-Reference.com](http://www.baseball-reference.com)
-- [BaseballGuru.com](http://baseballguru.com/battingdatabase.html)
-- [BBALLsports.com](http://www.bballsports.com/)
-- [databaseBaseball.com](http://www.databasebaseball.com)
-- [Doug Steele's MLB and NBA statistics](http://www.dougstats.com/)
-- [FanGraphs](http://www.fangraphs.com/)
-- [Home Run Tracker](http://www.hittrackeronline.com/index.php)
-- [John Skillton's Baseball Links](http://www.baseball-links.com/)
-- [Retrosheet](http://www.retrosheet.org)
-- [SABR: The Society for American Baseball Research](http://www.sabr.org/)
-]
-
-.right[
-- [Sean Lahman's Baseball Archive](http://www.seanlahman.com/baseball-archive/statistics/)
-- [StatCorner](http://www.statcorner.com/)
-- [The Baseball Cube](http://www.thebaseballcube.com/)
-]
+![](hockeydb.png)
 
 ---
 
-class: slide-img
+# Answer: Football UK
 
-# Resources: Basketball
+A repository of betting data on soccer matches is available under the 'Historical Data' and these data are available as CSV files.
 
-- [82games.com](http://www.82games.com/)
-- [APBR](http://www.apbr.org/)
-- [Basketball Reference](http://www.basketball-reference.com/)
-- [basketballvalue.com](http://www.basketballvalue.com/)
-- [BBALLsports.com](http://www.bballsports.com/)
-- [Currrent NBA Stats](http://www.nba.com/statistics/index.html)
-- [DatabaseBasketball](http://www.databasebasketball.com/)
-- [Doug Steele's MLB and NBA statistics](http://www.dougstats.com/)
-- [Final Four](http://www.finalfour.net/)
-- [Hoopdata.com](http://www.hoopdata.com/)
-- [Ken Pomeroy's college basketball site](http://www.kenpom.com/)
-- [NCAA Final Four](http://www.ncaa.org/)
-- [Washingtonpost.com](http://stats.washingtonpost.com/nba/)
+![](footballuk.png)
 
 ---
-
-class: slide-img
-
-# Resources: Hockey
-
-
-- [Puckalytics](https://puckalytics.com)
-- [BBALLsports.com](http://www.bballsports.com/)
-- [databaseHockey.com](http://www.databasehockey.com/)
-- [Hockey Analysis](http://stats.hockeyanalysis.com/)
-- [Hockey Reference](http://www.hockey-reference.com/)
-- [hockeyDB.com](http://www.hockeydb.com/)
-- [NHL Players' Association Statistics](http://www.nhlpa.com/stats/league-wide)
-- [NHL.com](http://www.nhl.com/ice/statshome.htm)
-- [QuantHockey.com](http://www.quanthockey.com/)
-- [Washingtonpost.com](http://stats.washingtonpost.com/nhl/teams.asp)
-
----
-
-class: slide-img
-
-# Resources: Soccer
-
-- [football data](http://www.football-data.co.uk/)
-- [Football-Data.co.uk](http://www.football-data.co.uk/data.php)
-- [Soccerway](http://soccerway.com)
-- [squawka](http://www.squawka.com/)
-- [Statto.com](http://www.statto.com/football/stats)
-- [Transfermarkt](http://www.transfermarkt.com/)
-- [WhoScored.com](http://www.whoscored.com/)
-- [World Cup Soccer](http://www.worldcup.com/)
-
----
-
-class: slide-img
-
-# Resources: Individual and Other Sports
-
-.left[
-- Cycling
-  - [Union Cycliste Internationale](http://www.uci.ch/)
-- Cricket
-  - [Cricinfo](http://www.espncricinfo.com/)
-  - [Cricketarchive.com](http://cricketarchive.com/Miscellaneous/statistics.html)  
-- Fencing
-  - [United States Fencing Association](http://www.usfa.org/)
-- Golf
-  - [databaseGolf.com](http://www.databasegolf.com/)
-- Tennis
-  - [ATP Tour](http://www.atpworldtour.com/)
-  - [WTA Tour](http://www.wtatennis.com/)
-  - [Tennis Abstract](http://www.tennisabstract.com/)
-]
-
-.right[
-- Olympics
-  - [databaseOlympics](http://www.databaseSports.com/olympics)
-  - [Official Olympics Site](http://www.olympic.org/uk/index_uk.asp)
-  - [Olympics at Sports-Reference.com](http://www.sports-reference.com/olympics/)
-- Rugby
-  - [Rugby Data](http://www.rugbydata.com/)
-- AFL
-  - [AFL Statistics](http://www.afl.com.au/stats)
-- Volleyball
-  - [Volleyball Worldwide](http://www.volleyball.org/)
-- Racing
-  - [databaseRacing.com](http://www.databaseracing.com/)
-  - [F1 Facts](http://f1-facts.com/stats)
-- Other
-  - [CrossFit Games](http://games.crossfit.com/leaderboard)
-  - [Massey Data](http://www.masseyratings.com/data.php)
-]
-
----
-
-class: slide-img
 
 # Packages
 
 ```{r results = 'asis', echo = FALSE}
 data <- data.frame(
   Sport = c("General", "", "", "Soccer", "Baseball", "", "Tennis", "Cricket"),
-  Package = c("stattleshipR", "SportsAnalytics", "odds.converter",  "engsoccerdata", "pitchRx", "Lahman", "deuce", "cricketr!")
+  Package = c("stattleshipR", "SportsAnalytics", "odds.converter",  "engsoccerdata", "pitchRx", "Lahman", "deuce", "cricketr!"),
+  "What it Does" = c(
+    "Data capture API for multiple sports",
+    "Sports datasets and WEB import functions",
+    "Convert odds to probabilities",
+    "Repository of soccer datasets from 1871 to present",
+    "Access to MLB Gameday data including pitchFX",
+    "Sean Lahman baseball database",
+    "Repository of multiple tennis datasets",
+    "Functions for analyzing ESPN Cricinfo stats"
+  )
 )
 
 cols <- c( "#fff", "#fff", "#fff", "#eeeeee", "#fff", "#fff", "#eeeeee", "#fff")
 
 htmlTable(data, 
           rnames = F, 
+          align = c("cll"),
           col.rgroup = cols,
-          css.cell = "width: 70%;text-align:center;")
+          css.cell = "width:20%;")
+```
+
+---
+
+# More on `deuce`
+
+--
+
+* `deuce` is a package I created to make it easy to access large historical data on tennis matches
+
+--
+
+* It combines data from multiple sites: 
+  - [flashscore.com](www.flashscore.com)
+  - [ATP Tour](http://atptour.com)
+  - [WTA Tour](http://www.wtatennis.com)
+  - [Tennis Abstract](www.tennisabstract.com)
+  
+
+--
+
+* Some of the data you can obtain from `deuce` includes:
+
+  - Match results from Open Era (1968) to the present
+
+  - Historical rankings
+
+  - Player demographics
+
+  - Point-level data for multiple years at Grand Slams
+
+  - Shot level data from the Match Charting Project
+  
+---
+
+class: slide-img
+
+# Installing `deuce`
+
+You can install deuce using `devtools`. It may take several minutes because of the size of the datasets being transferred.
+
+<br>
+
+```{r eval = FALSE}
+library(devtools)
+
+devtools::install_github("skoval/deuce")
+```
+
+---
+
+class: slide-img
+
+# Using Documentation
+
+One of the best ways to get familiar with what a package does is to look at the package index. Try the following:
+
+```{r eval = FALSE}
+library(deuce)
+
+help(package = "deuce")
+```
+
+<br>
+
+How would you learn about the contents of `atp_matches`?
+
+--
+
+```{r eval = FALSE}
+help("atp_matches", package = "deuce")
 ```

@@ -27,28 +27,15 @@ class: slide-img
 
 # Data Wrangling
 
-.cbox[
-Data wrangling refers to the process of going from messy data to data that can be analyzed.
+.left[
+* Data wrangling is the process of going from messy data to data that can be analyzed
+
+* It's not always fun but tools in *R* help to avoid a lot of headaches 
 ]
 
----
-
-# Package WOMBATsport
-
-* For the remainder of tutorial, we will be using data examples in the package `WOMBATsport`
-
-* This is an `R` package that has been specially designed for this tutorial
-
-* You can install is using the following:
-
-<br>
-
-```{r eval = FALSE}
-library(devtools)
-
-install_github("skoval/WOMBATsport")
-````
-
+.right[
+![](homer_bang.gif)
+]
 
 ---
 
@@ -61,20 +48,6 @@ When _tidying_ our goal is to end up with a row-by-column structure of our data,
 
 ![](tidy_goal.jpeg)
 
-
----
-
-class: slide-img
-
-# Common Steps with Data Wrangling
-
-- Tidying
-
-- Reshaping
-
-- Selecting
-
-- Mutating
 
 ---
 
@@ -96,9 +69,26 @@ class: slide-img
 
 ---
 
+# Common Data Wrangling Steps 
+
+1. Manipulating strings
+
+2. Selecting
+
+3. Transforming
+
+4. Reshaping
+
+5. Validity check
+
+---
+
+
 # Example: Match Statistics
 
 Recall the example from the Zverev v Djokovic tennis match that we pulled from the ATP site using `RSelenium`. The extracted data is in a single string, so it is unstructured and needs to be tidied up.
+
+Let's store those results in the object `match_stats`.
 
 ```{r echo = FALSE, message = FALSE}
 library(WOMBATsport)
@@ -107,10 +97,6 @@ data(match_stats)
 ```
 
 ```{r eval = FALSE}
-library(WOMBATsport)
-
-data(match_stats) # load from WOMBATsport
-
 match_stats
 ```
 
@@ -119,22 +105,29 @@ match_stats
 
 ---
 
-# What Steps Do We Need?
+# What Is Needed?
+
+To get this string of match statistics into a data frame we can work with, we need to:
+
+--
+
+<br>
 
 1. Identify the target structure (that is, variables and value types)
 
 2. Split the string into the different variables
 
-3. Extract values
+3. Extract values 
 
 4. Assign to variables in a data.frame
 
+5. Convert values to appropriate types
+
 ---
 
-# Example: Goal Structure
+# Example: Target Structure
 
-We have a set of statistics for each player. One option is a long format with the following structure:
-
+We have a set of statistics for each player. One option is a "long"" format with the following structure:
 
 <br>
 
@@ -142,6 +135,21 @@ We have a set of statistics for each player. One option is a long format with th
 <img src="match_stats_table.png" width=60%>
 </div>
 
+
+---
+
+# Question: Target Structure
+
+Suppose we instead wanted a "wide" format. How would that differ?
+
+<br>
+--
+
+_Answer:_
+
+<div align="center">
+<img src="match_stats_table_wide.png" width=80%>
+</div>
 
 ---
 
@@ -220,6 +228,38 @@ values <- split[
 
 ---
 
+# Practice: Using RegEx to Sort Data
+
+There are a number of other ways we could isolate the statistic values from the other content of our string.
+
+Find an alternative.
+
+--
+
+_Answer:_ An equivalent alternative uses the unique ending character
+
+```{r}
+values <- str_subset(split, "[[0-9]\\)\\%]$")
+```
+
+---
+
+# Question: Using RegEx to Sort Data
+
+Why didn't we just use the `[0-9]` regular expression to isolate the statistic values?
+
+--
+
+_Answer:_
+
+Because the name of some statistics includes numbers, this wouldn't isolate the values.
+
+```{r}
+str_subset(split, "[0-9]")
+```
+
+---
+
 # Example: Structuring Data Frame
 
 We notice that some stats have just counts while others have percentages and ratios. We can deal with this by flagging counts and expanding the data frame based on the condition of being a count or percentage stat.
@@ -242,6 +282,7 @@ data.frame(
 
 We will need to do some more tidying of the strings to get our `value` column into numeric values. String replace will be a big help. Here are some examples of removing percentage signs and parentheses using `str_replace`.
 
+
 ```{r}
 # We use 'all' to replace all instances
 # The escapes \\ make sure () are treated as fixed
@@ -249,9 +290,40 @@ str_replace_all(values,"[\\(%\\)]", "")
 ```
 
 
+
 ---
 
+# Practice: String Substitution
 
+1. Use the `str_replace_all` function to prepare the `valuea` column of our data set for numeric conversion
+
+2. Convert the values to numeric
+
+3. Check that the first serve percentage won matches the proportion from the ratio form
+
+---
+
+# Solution: String Substitution
+
+```{r}
+match_stats <- data.frame(
+	stat = rep(stats, ifelse(counts, 2, 4)),
+	values = str_replace_all(values,"[\\(%\\)]", ""),
+	stringsAsFactors = FALSE
+)
+
+match_stats <- match_stats %>%
+  rowwise() %>%
+  dplyr::mutate(
+    values = ifelse(!str_detect(values, "/"), as.numeric(values),
+      "/"(as.numeric(str_extract_all(values, "[0-9]+")[[1]])[1],
+          as.numeric(str_extract_all(values, "[0-9]+")[[1]])[2]))
+  )
+
+subset(match_stats, stat == "1st Serve Points Won")
+```
+
+---
 # Tidying Structured Data
 
 Sometimes we get data in a row by column format but there are still problems with data values. Some common issues with sports data are:
@@ -356,31 +428,92 @@ htmlTable(data,
 
 ---
 
-# Getting Started
+# Objective: Scoring Surprising Event Results
+
+.left[
+* We will walk through a number of common tidying steps using a real-world example
+
+* Suppose we want to measure which player had the most surprising Australian Open performance in the past 3 years
+
+* Let's use the match result info from [www.tennis-data.co.uk](http://www.tennis-data.co.uk/) to try to get at this question
+]
+
+.right[
+<div align="center">
+<img src="istomin.png" width=70%>
+</div>
+]
+
+
+.footnote[
+[1] Denis Istomin after upset of Novak Djokovic at 2017 AO
+]
+---
+
+# Importing the Data
+
+* First, we need to read-in the data from the site for the years 2015 to 2017
+
+* Each year is stored in a separate file with a URL that has the following pattern:
+
+```{r eval = FALSE}
+"http://www.tennis-data.co.uk/year/ausopen.csv"
+```
+
+
+---
+
+# Practice: String and Import
+
+How would you use the URL pattern to get a single data frame of the results for AOs 2015 to 2017?
+
+--
+
+<br>
+
+_Answer:_
+
+```{r}
+url <- "http://www.tennis-data.co.uk/year/ausopen.csv"
+
+years <- sapply(2015:2017, function(x) sub("year", x, url))
+
+data <- do.call("rbind", lapply(years, read.csv))
+```
+
+---
+
+# Checking for Messy Data
+
+--
+
+- With any data directly from the Web we need to be on guard for some messiness
+
+--
 
 - The first step to diagnosing the messy issues, is to inspect each variable in the dataset. 
 
+--
+
 - I recommend separating characters and numeric.
 
+--
+
 - Sort and look at unique values for character type 
+
+--
 
 - Use summary on each numeric type
 
 ---
 
-# Example: ATP 2016 Data
+# Inspect Classes
 
-The following dataset comes directly from [www.tennis-data.co.uk](http://www.tennis-data.co.uk/)
+The code below evaluates the classes in our dataset. What do we conclude from this?
 
-
-```{r echo = TRUE}
-library(WOMBATsport)
-
-data(atp_2016_odds) # load atp_odds
-
-classes <- apply(atp_odds, 2, class) # Obtain the variable classes
-
-classes
+```{r}
+# Check classes
+table(apply(data, 2, class))
 ```
 
 <br>
@@ -389,98 +522,50 @@ classes
 
 ---
 
-# Example: Inspect Character Variables
+# Inspect Variables
 
-The `ask` function of `gtools` is useful for inspecting variables one at a time. 
+To learn more about the contents of each variable and any issues we need to address, I like to use the `ask` function of `gtools`. Here is how we can use it to inspect variables one at a time. 
 
-```{r echo = TRUE}
+```{r echo = TRUE, eval = FALSE}
 library(gtools) # For ask function
 
 # Inspection loop
-for(name in names(classes)){
-	print(sort(unique(atp_odds[,name])))
-	ask()
+for(name in names(data)){
+	print(name)
+    print(sort(unique(data[,name])))
+    ask()
 }
 ```
 
 ---
 
-# Type Conversion
+# Practice: Inspect Variables
 
-- Based on our inspection, several type conversions would improve our data. 
-
-- One is to convert `Best.of` from character to numeric. 
-
-- The second is to make `Round` a factor. 
-
----
-
-# Conversion: Character to Numeric
-
-- The `Best.of` takes either `3` or `5`, which we can convert directly using `as.numeric`.
-
-- To `mutate` or change/create a variable we will use the `dplyr` package.
-
-```{r}
-library(dplyr) # dplyr for data manipulation
-
-atp_odds <- atp_odds %>%
-  dplyr::mutate(
-    Best.of = as.numeric(Best.of)
-  )
-```
+Complete the inspection step in the previous slide. Determine:
 
 <br>
 
-*Note:* `%>%` is a piping operator
+1. What variables does the dataset contain?
+
+2. Which variables are relevant to measuring event surprising event outcomes by player and year?
+
+3. Are there any issues with those variables we need to address?
 
 ---
 
-# Conversion: Factor
+# Solution: Inspect Variables
 
-For `Round`, we want to make a ordered factor, which will allow us to use `Round` as a numeric when needed without losing it's descriptive labels.
+- The dataset contains winner and loser info for each match along with the pre-match Odds by several different bookmakers
 
-```{r}
-# Define round order
-rounds <- c("Round Robin", "1st Round", 
-            "2nd Round", "3rd Round", "4th Round", 
-            "Quarterfinals", "Semifinals", "The Final") 
+- The 'Date', 'Winner', and one or more of the odds will be used to measure a player's event performance
 
+- We need to create a 'Year' variable, check for duplicates/variants in spelling among Winner names, create a 'surprise score' for each win, and filter out 'Retirements' matches
 
-atp_odds <- atp_odds %>%
-  dplyr::mutate(
-    Round = factor(Round,
-		levels = rounds,
-		order = T
-))
-```
+--
 
+<br>
 
----
-
-# Non-ASCII Characters
-
-
-- Another issue our inspection revealed were non-[ASCII](https://en.wikipedia.org/wiki/ASCII) characters in the `Tournament` variable.
-
-- We could identify this issue because of Hexadecimal characters like `\x99` and `\xd5` in the variable.
-
-
-- Having these characters not only makes the characters unreadable, it also prevents us from using some string manipulation functions like `grep`.
-
----
-
-# Handling Non-ASCII
-
-We can use the `iconv` function to force the variable into ASCII and remove any non-ASCII by using the `sub` argument.
-
-```{r}
-atp_odds <- atp_odds %>%
-  dplyr::mutate(
-    Tournament =  iconv(Tournament, "latin1", "ASCII", sub = "")
-  )
-```
-
+<h3 style="color:#f2ca95;">Let's get started...</h3>
 
 ---
 
@@ -491,15 +576,16 @@ atp_odds <- atp_odds %>%
 * `lubridate` has conversion functions that are named according to the format of our input. 
 
 ```{r echo = FALSE}
-data <- data.frame(
+data.table <- data.frame(
   "Function" = c("dmy", "mdy", "ymd"),
   "Example" = c("3/2/99", "12302017", "1981-10-21")
 )
 
-htmlTable(data, 
+htmlTable(data.table, 
           rnames = F, 
           col.rgroup = c("#fff", "#eeeeee"),
-          css.cell = "width:80%;text-align:center;")
+          css.cell = "width:80%;text-align:center;",
+          css.table = "margin-left:20%;")
 ```
 
 <br>
@@ -508,35 +594,84 @@ htmlTable(data,
 
 ---
 
-# Question
+# Convert Date and Make Year
 
-Look at `Date` in the `atp_odds` dataset. What is the appropriate conversion function for these dates?
+In this code we will use `lubridate` and `dplyr` to convert the `Date` variable and create the variable `Year`. 
 
---
+```{r message = FALSE}
+library(dplyr) # dplyr for data manipulation
+library(lubridate) # date manipulation
 
-*Answer:* `dmy`
+data <- data %>%
+	dplyr::mutate(
+		Date  = dmy(Date),
+		Year = year(Date)
+	)
+```
+
+<br>
+
+*Note:* `%>%` is a piping operator
 
 ---
 
+# Surprise Score
 
-# Date Conversion
+.left[
+** What should define a surprising event performance? **
 
-Here we convert the `Date` and use the `month` and `year` functions to create variables for `Month` and `Year`.
+- A string of big upsets is one definition
 
-```{r message = FALSE}
-library(lubridate) # Load lubridate
+- We can use the bookmaker odds to measure what a player was expected to do and compare that against their actual wins
 
-atp_odds <- atp_odds %>%
-    dplyr::mutate(
-      Date =  dmy(Date), # Conversion
-      Year = year(Date), # Numeric year
-      Month = month(Date)
-    )
+- A more surprising result is one that exceeds expectations
+
+- The sum of this 'surprise score' over all of a player's wins will be their event 'Surprise Score'
+]
+
+.right[
+![](inspector_gadget.gif)
+]
+
+---
+
+# Which Odds?
+
+There are several odds to choose from. Without knowing more about the bookmakers, we will choose one of the odds that is most complete across matches. To do this, we need to check for missing values.
+
+```{r}
+data %>%
+	select(B365W:AvgL) %>%
+	summarise_all(
+		funs(sum(is.na(.)))
+	)
 ```
+
+
+---
+
+# Create Suprise Score
+
+We will use the `B365W` odds for the winner and do the simple inversion to estimate the expected win chances for the player.
+
+<br>
+
+```{r}
+data <- data %>% 
+	dplyr::mutate(
+		SurpriseScore = 1 - 1 / as.numeric( B365W)
+	)	
+```
+
+.footnote[
+[1] Remember we needed to convert to numeric before making this calculation
+]
 
 ---
 
 # Cleaning Names
+
+- Before we can summarise results by `Winner` we need to check the validity of the names
 
 - One of the most troublesome issues with sports data are inconsistent naming of players. This is a problem when you need to assign performance measures to the same individual, based on their name.
 
@@ -575,7 +710,7 @@ Most of the arguments are like the usual `grep` except for two: `max.distance` a
 Here we look for possible inconsistencies in the `Winner` variable using `agrep`.
 
 ```{r}
-players <- sort(unique(atp_odds$Winner)) # Get unique players
+players <- sort(unique(as.character(data$Winner))) # Get unique players
 
 approx <- lapply(players, agrep, fixed = T, x = players) 
 # Compare each player against all others
@@ -586,7 +721,60 @@ players[sapply(approx, length) > 1]
 
 ---
 
-# Reshape
+# Practice: Cleaning Names
+
+Based on the results from our inspection in the previous slide, which changes do you think are needed to the `Winner` variable?
+
+--
+
+<br>
+
+_Answer:_
+
+Bautista Agut is the only name with true variants, so we will choose one.
+
+<br>
+
+```{r}
+data$Winner[data$Winner == "Bautista Agut R."] <- "Bautista R."
+```
+
+---
+
+# Total Surprise Score
+
+We are now ready to compute a total surprise score for each player and year. Using `summarise`, find the top 10 most surprising performances in the past 3 years.
+
+--
+
+_Answer:_
+
+```{}
+summarise_wins <- data %>%
+	filter(Comment != "Retired") %>% # Remember to remove retirements
+	group_by(Year, Winner) %>%
+	dplyr::summarise(
+		TotalSurpriseScore = sum(SurpriseScore)
+	)
+
+summarise_wins[order(summarise_wins$TotalSurpriseScore, decreasing = T),][1:10,]
+```
+
+---
+
+# What About Losses?
+
+--
+
+- Suppose we had wanted a score based on wins and losses, what would we need to do this?
+
+--
+
+- We would need to switch to a _long_ format which means reshaping our data
+
+---
+
+# Reshaping Data
 
 In addition to transforming individual variables, we often will want to reshape our data from wide to long or long to wide formats.
 
@@ -632,98 +820,19 @@ The values that will be inserted into those columns is indicated with the `value
 
 ---
 
-# Example: Reshaping
+# Practice: Reshaping
 
-Create a long version of the `atp_odds` data that stacks the `Winner` and `Loser` as the variable `player`.
+Use the `tidyr` package to create a long format of our data that groups `Winner` and `Loser` into a single `player` column.
 
-```{r}
-atp_odds_long <- atp_odds %>%
-  gather("Result", "Player", Winner, Loser)
+--
 
-head(atp_odds_long[,c("Date", "Result", "Player")])
-```
-
----
-
-# Practice: 2016 ATP Matches
-
-Practice what we've learned by looking at the `atp_matches` data set that includes results and service stats for ATP 2016 matches.
-
-1. Inspect each variable and note any peculiarities
-
-2. Create a date object for the tournament date
-
-3. Create a long format by stacking winners and losers
-
-4. Search for any inconsistencies with the naming of players
-
-
----
-
-# Solution: Variable Inspection
-
-```{r echo = FALSE}
-data(atp_2016) # dataset from WOMBATsport
-```
-
-
-```{r eval = FALSE}
-data(atp_2016) # dataset from WOMBATsport
-
-classes <- apply(atp_matches, 2, class)
-
-for(name in names(classes)){
-	print(sort(unique(atp_matches[,name])))
-	ask()
-}
-```
-
----
-
-# Solution: Peculiarities
-
-1. There are character variables (minutes, draw_size, w_1stWon to l_svpt) that need to be converted to numeric
-
-2. `tourney_name`, `surface`, `round`, `winner_name` and `loser_name` each have blank values
-
-3. Some of `minutes` and stats have a value of 0
-
----
-
-# Solution: Date Conversion
+_Answer:_
 
 ```{r}
-atp_matches <- atp_matches %>%
-	dplyr::mutate(
-		tourney_date = ymd(tourney_date)
-	)
+data <- data %>%
+  gather("Outcome", "Player", Winner, Loser)
 
-atp_matches$tourney_date[1:10]
-```
-
----
-
-# Solution: Reshaping
-
-```{r}
-atp_matches_long <- atp_matches %>%
-  gather("result", "player", winner_name, loser_name)
-
-head(atp_matches_long[,c("tourney_date", "result", "player")])
-```
-
----
-
-# Solution: Check for Naming Inconsistencies
-
-
-```{r}
-players <- sort(unique(atp_matches_long$player))
-players <- players[players != ""] # Remove empty cases
-
-approx <- lapply(players, agrep, fixed = T, x = players)
-
-players[sapply(approx, length) > 1]
+head(data[,c("Date", "Outcome", "Player")])
 ```
 
 ---

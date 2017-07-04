@@ -1,0 +1,92 @@
+\documentclass[12pt]{article}
+\usepackage[top=1in,bottom=1in,right=1.25in,left=1in]{geometry}
+\usepackage{tgadventor}
+\usepackage{xcolor,graphicx}
+\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{setspace}
+
+\definecolor{Rblue}{rgb}{0.356863,0.47,0.8}
+\pagestyle{empty}
+
+\begin{document}
+
+\large
+
+\includegraphics[width=1in]{/Users/skovalchik/Courses/NCI-RTutorial/images/Rlogo}
+\textbf{\textcolor{gray}{Sports Analytics with R}}
+
+\textcolor{Rblue}{{\rule{\linewidth}{0.5mm}}}
+
+\textcolor{Rblue}{\bfseries useR!2017 Tutorial}
+
+
+\textcolor{Rblue}{\bfseries July 4 2017}
+
+
+\vskip .5in
+
+
+\textbf{\textcolor{Rblue}{Overview:}} \\
+
+I am very pleased you will be participating in the \emph{Sports
+  Analytics with R} tutorial at the \textcolor{Rblue}{useR!2017 Conference} . The tutorial is just a few days
+away. \\
+
+In order that you get the most out of the experience, I've
+provided some useful information about resources for the workshop and
+some packages you will want to make sure to install by the day of the tutorial.
+
+\vskip .5in
+
+\textbf{\textcolor{Rblue}{Before the Tutorial:}} \\
+
+\begin{itemize}
+\item Please make sure you will have a laptop with you and will be able to
+use \textcolor{Rblue}{R} during the tutorial.
+\item You should ensure that you have version 3.2 or higher of
+  \textcolor{Rblue}{R} on the machine you will be using at the
+  conference.
+\item Please install the \textcolor{Rblue}{deuce} package from
+  github, which has datasets we will be using during the
+  tutorial. Depending on your connection speed, this may take several
+  minutes to install so it is \emph{very important} to do this before July 4th. You
+  can install using the \texttt{devtools} command:
+\item[] \texttt{devtools::install\_github(`skoval$/$deuce')}.
+\item If you want to be able to do all of the examples, please make
+  sure you have installed the following packages and their
+  dependencies: \textcolor{Rblue}{devtools},
+  \textcolor{Rblue}{gtools}, \textcolor{Rblue}{lubridate},
+  \textcolor{Rblue}{stringr}, \textcolor{Rblue}{dplyr},
+  \textcolor{Rblue}{tidyr},
+  \textcolor{Rblue}{rvest}, \textcolor{Rblue}{RSelenium},
+  \textcolor{Rblue}{ggplot2}, \textcolor{Rblue}{ggthemes},
+  \textcolor{Rblue}{plot3D}, \textcolor{Rblue}{caret},
+  \textcolor{Rblue}{blogdown},  \textcolor{Rblue}{plotly}
+\item You can install   \textcolor{Rblue}{blogdown} from github using:
+\item[] \texttt{devtools::install\_github(`rstudio$/$blogdown')}. 
+\item[] The others should be available on CRAN.
+\item Using \textcolor{Rblue}{RSelenium} may require additional
+  installation of Selenium serve, a java program. You can find the
+  information on installation under `How do I run the Selenium Server`
+  at \url{https://cran.r-project.org/web/packages/RSelenium/vignettes/RSelenium-basics.html#how-do-i-run-the-selenium-server}
+\end{itemize}
+
+
+I will also have pdf copies of the lecture slides if you would like
+them after the tutorial, please contact me.
+
+
+\vskip .5in
+
+\textbf{\textcolor{Rblue}{Contact:}} \\
+
+
+If you have questions before or after the conference, please send
+an e-mail to me (Stephanie Kovalchik) at \url{s.a.kovalchik@gmail.com}.
+
+
+\end{document}
+
+

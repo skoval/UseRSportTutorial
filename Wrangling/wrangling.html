@@ -23,29 +23,15 @@ class: slide-img
 
 # Data Wrangling
 
-.cbox[
-Data wrangling refers to the process of going from messy data to data that can be analyzed.
+.left[
+* Data wrangling is the process of going from messy data to data that can be analyzed
+
+* It's not always fun but tools in *R* help to avoid a lot of headaches 
 ]
 
----
-
-# Package WOMBATsport
-
-* For the remainder of tutorial, we will be using data examples in the package `WOMBATsport`
-
-* This is an `R` package that has been specially designed for this tutorial
-
-* You can install is using the following:
-
-&lt;br&gt;
-
-
-```r
-library(devtools)
-
-install_github("skoval/WOMBATsport")
-```
-
+.right[
+![](homer_bang.gif)
+]
 
 ---
 
@@ -58,20 +44,6 @@ When _tidying_ our goal is to end up with a row-by-column structure of our data,
 
 ![](tidy_goal.jpeg)
 
-
----
-
-class: slide-img
-
-# Common Steps with Data Wrangling
-
-- Tidying
-
-- Reshaping
-
-- Selecting
-
-- Mutating
 
 ---
 
@@ -93,18 +65,31 @@ class: slide-img
 
 ---
 
+# Common Data Wrangling Steps 
+
+1. Manipulating strings
+
+2. Selecting
+
+3. Transforming
+
+4. Reshaping
+
+5. Validity check
+
+---
+
+
 # Example: Match Statistics
 
 Recall the example from the Zverev v Djokovic tennis match that we pulled from the ATP site using `RSelenium`. The extracted data is in a single string, so it is unstructured and needs to be tidied up.
+
+Let's store those results in the object `match_stats`.
 
 
 
 
 ```r
-library(WOMBATsport)
-
-data(match_stats) # load from WOMBATsport
-
 match_stats
 ```
 
@@ -113,22 +98,29 @@ match_stats
 
 ---
 
-# What Steps Do We Need?
+# What Is Needed?
+
+To get this string of match statistics into a data frame we can work with, we need to:
+
+--
+
+&lt;br&gt;
 
 1. Identify the target structure (that is, variables and value types)
 
 2. Split the string into the different variables
 
-3. Extract values
+3. Extract values 
 
 4. Assign to variables in a data.frame
 
+5. Convert values to appropriate types
+
 ---
 
-# Example: Goal Structure
+# Example: Target Structure
 
-We have a set of statistics for each player. One option is a long format with the following structure:
-
+We have a set of statistics for each player. One option is a "long"" format with the following structure:
 
 &lt;br&gt;
 
@@ -136,6 +128,21 @@ We have a set of statistics for each player. One option is a long format with th
 &lt;img src="match_stats_table.png" width=60%&gt;
 &lt;/div&gt;
 
+
+---
+
+# Question: Target Structure
+
+Suppose we instead wanted a "wide" format. How would that differ?
+
+&lt;br&gt;
+--
+
+_Answer:_
+
+&lt;div align="center"&gt;
+&lt;img src="match_stats_table_wide.png" width=80%&gt;
+&lt;/div&gt;
 
 ---
 
@@ -257,6 +264,70 @@ values &lt;- split[
 
 ---
 
+# Practice: Using RegEx to Sort Data
+
+There are a number of other ways we could isolate the statistic values from the other content of our string.
+
+Find an alternative.
+
+--
+
+_Answer:_ An equivalent alternative uses the unique ending character
+
+
+```r
+values &lt;- str_subset(split, "[[0-9]\\)\\%]$")
+```
+
+---
+
+# Question: Using RegEx to Sort Data
+
+Why didn't we just use the `[0-9]` regular expression to isolate the statistic values?
+
+--
+
+_Answer:_
+
+Because the name of some statistics includes numbers, this wouldn't isolate the values.
+
+
+```r
+str_subset(split, "[0-9]")
+```
+
+```
+##  [1] "7"                           "1"                          
+##  [3] "2"                           "3"                          
+##  [5] "71%"                         "(32/45)"                    
+##  [7] "1st Serve"                   "64%"                        
+##  [9] "(43/67)"                     "84%"                        
+## [11] "(27/32)"                     "1st Serve Points Won"       
+## [13] "70%"                         "(30/43)"                    
+## [15] "69%"                         "(9/13)"                     
+## [17] "2nd Serve Points Won"        "38%"                        
+## [19] "(9/24)"                      "0%"                         
+## [21] "(0/0)"                       "40%"                        
+## [23] "(2/5)"                       "9"                          
+## [25] "10"                          "30%"                        
+## [27] "(13/43)"                     "1st Serve Return Points Won"
+## [29] "16%"                         "(5/32)"                     
+## [31] "63%"                         "(15/24)"                    
+## [33] "2nd Serve Return Points Won" "31%"                        
+## [35] "(4/13)"                      "60%"                        
+## [37] "(3/5)"                       "0%"                         
+## [39] "(0/0)"                       "10"                         
+## [41] "9"                           "80%"                        
+## [43] "(36/45)"                     "58%"                        
+## [45] "(39/67)"                     "42%"                        
+## [47] "(28/67)"                     "20%"                        
+## [49] "(9/45)"                      "57%"                        
+## [51] "(64/112)"                    "43%"                        
+## [53] "(48/112)"
+```
+
+---
+
 # Example: Structuring Data Frame
 
 We notice that some stats have just counts while others have percentages and ratios. We can deal with this by flagging counts and expanding the data frame based on the condition of being a count or percentage stat.
@@ -333,6 +404,7 @@ data.frame(
 We will need to do some more tidying of the strings to get our `value` column into numeric values. String replace will be a big help. Here are some examples of removing percentage signs and parentheses using `str_replace`.
 
 
+
 ```r
 # We use 'all' to replace all instances
 # The escapes \\ make sure () are treated as fixed
@@ -350,9 +422,53 @@ str_replace_all(values,"[\\(%\\)]", "")
 ```
 
 
+
 ---
 
+# Practice: String Substitution
 
+1. Use the `str_replace_all` function to prepare the `valuea` column of our data set for numeric conversion
+
+2. Convert the values to numeric
+
+3. Check that the first serve percentage won matches the proportion from the ratio form
+
+---
+
+# Solution: String Substitution
+
+
+```r
+match_stats &lt;- data.frame(
+	stat = rep(stats, ifelse(counts, 2, 4)),
+	values = str_replace_all(values,"[\\(%\\)]", ""),
+	stringsAsFactors = FALSE
+)
+
+match_stats &lt;- match_stats %&gt;%
+  rowwise() %&gt;%
+  dplyr::mutate(
+    values = ifelse(!str_detect(values, "/"), as.numeric(values),
+      "/"(as.numeric(str_extract_all(values, "[0-9]+")[[1]])[1],
+          as.numeric(str_extract_all(values, "[0-9]+")[[1]])[2]))
+  )
+
+subset(match_stats, stat == "1st Serve Points Won")
+```
+
+---
+
+```
+## # A tibble: 4 x 2
+##                   stat     values
+##                  &lt;chr&gt;      &lt;dbl&gt;
+## 1 1st Serve Points Won 84.0000000
+## 2 1st Serve Points Won  0.8437500
+## 3 1st Serve Points Won 70.0000000
+## 4 1st Serve Points Won  0.6976744
+```
+
+---
 # Tidying Structured Data
 
 Sometimes we get data in a row by column format but there are still problems with data values. Some common issues with sports data are:
@@ -477,39 +593,101 @@ This is an overview of `tidyr` tools. Like `dplyr`, we will illustrate these `ti
 
 ---
 
-# Getting Started
+# Objective: Scoring Surprising Event Results
+
+.left[
+* We will walk through a number of common tidying steps using a real-world example
+
+* Suppose we want to measure which player had the most surprising Australian Open performance in the past 3 years
+
+* Let's use the match result info from [www.tennis-data.co.uk](http://www.tennis-data.co.uk/) to try to get at this question
+]
+
+.right[
+&lt;div align="center"&gt;
+&lt;img src="istomin.png" width=70%&gt;
+&lt;/div&gt;
+]
+
+
+.footnote[
+[1] Denis Istomin after upset of Novak Djokovic at 2017 AO
+]
+---
+
+# Importing the Data
+
+* First, we need to read-in the data from the site for the years 2015 to 2017
+
+* Each year is stored in a separate file with a URL that has the following pattern:
+
+
+```r
+"http://www.tennis-data.co.uk/year/ausopen.csv"
+```
+
+
+---
+
+# Practice: String and Import
+
+How would you use the URL pattern to get a single data frame of the results for AOs 2015 to 2017?
+
+--
+
+&lt;br&gt;
+
+_Answer:_
+
+
+```r
+url &lt;- "http://www.tennis-data.co.uk/year/ausopen.csv"
+
+years &lt;- sapply(2015:2017, function(x) sub("year", x, url))
+
+data &lt;- do.call("rbind", lapply(years, read.csv))
+```
+
+---
+
+# Checking for Messy Data
+
+--
+
+- With any data directly from the Web we need to be on guard for some messiness
+
+--
 
 - The first step to diagnosing the messy issues, is to inspect each variable in the dataset. 
 
+--
+
 - I recommend separating characters and numeric.
 
+--
+
 - Sort and look at unique values for character type 
+
+--
 
 - Use summary on each numeric type
 
 ---
 
-# Example: ATP 2016 Data
+# Inspect Classes
 
-The following dataset comes directly from [www.tennis-data.co.uk](http://www.tennis-data.co.uk/)
-
+The code below evaluates the classes in our dataset. What do we conclude from this?
 
 
 ```r
-library(WOMBATsport)
-
-data(atp_2016_odds) # load atp_odds
-
-classes &lt;- apply(atp_odds, 2, class) # Obtain the variable classes
-
-classes
+# Check classes
+table(apply(data, 2, class))
 ```
 
 ```
-##    Location  Tournament        Date      Series       Court     Surface 
-## "character" "character" "character" "character" "character" "character" 
-##       Round     Best.of      Winner       Loser 
-## "character" "character" "character" "character"
+## 
+## character 
+##        40
 ```
 
 &lt;br&gt;
@@ -518,431 +696,51 @@ classes
 
 ---
 
-# Example: Inspect Character Variables
+# Inspect Variables
 
-The `ask` function of `gtools` is useful for inspecting variables one at a time. 
+To learn more about the contents of each variable and any issues we need to address, I like to use the `ask` function of `gtools`. Here is how we can use it to inspect variables one at a time. 
 
 
 ```r
 library(gtools) # For ask function
 
 # Inspection loop
-for(name in names(classes)){
-	print(sort(unique(atp_odds[,name])))
-	ask()
+for(name in names(data)){
+	print(name)
+    print(sort(unique(data[,name])))
+    ask()
 }
 ```
 
-```
-##  [1] "'s-Hertogenbosch" "Acapulco"         "Antwerp"         
-##  [4] "Atlanta"          "Auckland"         "Barcelona"       
-##  [7] "Basel"            "Bastad"           "Beijing"         
-## [10] "Brisbane"         "Bucharest"        "Buenos Aires"    
-## [13] "Chengdu"          "Chennai"          "Cincinnati"      
-## [16] "Delray Beach"     "Doha"             "Dubai "          
-## [19] "Estoril"          "Geneva"           "Gstaad"          
-## [22] "Halle"            "Hamburg"          "Houston"         
-## [25] "Indian Wells"     "Istanbul"         "Kitzbuhel"       
-## [28] "London"           "Los Cabos"        "Madrid"          
-## [31] "Marrakech"        "Marseille"        "Melbourne"       
-## [34] "Memphis"          "Metz"             "Miami"           
-## [37] "Monte Carlo"      "Montpellier"      "Moscow"          
-## [40] "Munich"           "New York"         "Newport"         
-## [43] "Nice"             "Nottingham"       "Paris"           
-## [46] "Queens Club"      "Quito"            "Rio de Janeiro"  
-## [49] "Rome"             "Rotterdam"        "Sao Paulo"       
-## [52] "Shanghai"         "Shenzhen "        "Sofia"           
-## [55] "St. Petersburg"   "Stockholm"        "Stuttgart"       
-## [58] "Sydney"           "Tokyo"            "Toronto"         
-## [61] "Umag"             "Vienna"           "Washington"      
-## [64] "Winston-Salem"   
-## Press &lt;RETURN&gt; to continue:  [1] "Abierto Mexicano"                            
-##  [2] "Abierto Mexicano Mifel"                      
-##  [3] "ABN AMRO World Tennis Tournament"            
-##  [4] "AEGON Championships"                         
-##  [5] "AEGON Open"                                  
-##  [6] "Apia International"                          
-##  [7] "Argentina Open"                              
-##  [8] "ASB Classic"                                 
-##  [9] "Australian Open"                             
-## [10] "BB&amp;T Atlanta Open"                           
-## [11] "BMW Open"                                    
-## [12] "BNP Paribas Masters"                         
-## [13] "BNP Paribas Open"                            
-## [14] "Brasil Open"                                 
-## [15] "BRD Nastase Tiriac Trophy"                   
-## [16] "Brisbane International"                      
-## [17] "Chengdu Open"                                
-## [18] "Chennai Open"                                
-## [19] "China Open"                                  
-## [20] "Citi Open"                                   
-## [21] "Delray Beach Open"                           
-## [22] "Dubai Tennis Championships"                  
-## [23] "Ecuador Open"                                
-## [24] "Erste Bank Open"                             
-## [25] "European Open"                               
-## [26] "French Open"                                 
-## [27] "Garanti Koza Sofia Open"                     
-## [28] "Generali Open"                               
-## [29] "Geneva Open"                                 
-## [30] "German Tennis Championships"                 
-## [31] "Gerry Weber Open"                            
-## [32] "Grand Prix Hassan II"                        
-## [33] "Hall of Fame Championships"                  
-## [34] "Internazionali BNL d'Italia"                 
-## [35] "Istanbul Open"                               
-## [36] "Konzum Croatia Open"                         
-## [37] "Kremlin Cup"                                 
-## [38] "Masters Cup"                                 
-## [39] "Memphis Open"                                
-## [40] "Mercedes Cup"                                
-## [41] "Millenium Estoril Open"                      
-## [42] "Monte Carlo Masters"                         
-## [43] "Mutua Madrid Open"                           
-## [44] "Open 13"                                     
-## [45] "Open Banco Sabadell "                        
-## [46] "Open de Moselle"                             
-## [47] "Open de Nice C\x99te d\xd5Azur"              
-## [48] "Open Sud de France"                          
-## [49] "Qatar Exxon Mobil Open"                      
-## [50] "Rakuten Japan Open Tennis Championships"     
-## [51] "Rio Open"                                    
-## [52] "Rogers Masters"                              
-## [53] "Shanghai Masters"                            
-## [54] "Shenzhen Open"                               
-## [55] "SkiStar Swedish Open"                        
-## [56] "Sony Ericsson Open"                          
-## [57] "St. Petersburg Open"                         
-## [58] "Stockholm Open"                              
-## [59] "Suisse Open Gstaad"                          
-## [60] "Swiss Indoors"                               
-## [61] "Topshelf Open"                               
-## [62] "U.S. Men's Clay Court Championships"         
-## [63] "US Open"                                     
-## [64] "Western &amp; Southern Financial Group Masters"  
-## [65] "Wimbledon"                                   
-## [66] "Winston-Salem Open at Wake Forest University"
-## Press &lt;RETURN&gt; to continue:   [1] "1/02/2016"  "1/04/2016"  "1/05/2016"  "1/06/2016"  "1/07/2016" 
-##   [6] "1/08/2016"  "1/09/2016"  "1/10/2016"  "1/11/2016"  "10/01/2016"
-##  [11] "10/02/2016" "10/03/2016" "10/04/2016" "10/05/2016" "10/06/2016"
-##  [16] "10/07/2016" "10/08/2016" "10/10/2016" "11/01/2016" "11/02/2016"
-##  [21] "11/03/2016" "11/04/2016" "11/05/2016" "11/06/2016" "11/07/2016"
-##  [26] "11/08/2016" "11/09/2016" "11/10/2016" "12/01/2016" "12/02/2016"
-##  [31] "12/03/2016" "12/04/2016" "12/05/2016" "12/06/2016" "12/07/2016"
-##  [36] "12/08/2016" "12/10/2016" "13/01/2016" "13/02/2016" "13/03/2016"
-##  [41] "13/04/2016" "13/05/2016" "13/06/2016" "13/07/2016" "13/08/2016"
-##  [46] "13/10/2016" "13/11/2016" "14/01/2016" "14/02/2016" "14/03/2016"
-##  [51] "14/04/2016" "14/05/2016" "14/06/2016" "14/07/2016" "14/08/2016"
-##  [56] "14/10/2016" "14/11/2016" "15/01/2016" "15/02/2016" "15/03/2016"
-##  [61] "15/04/2016" "15/05/2016" "15/06/2016" "15/07/2016" "15/08/2016"
-##  [66] "15/10/2016" "15/11/2016" "16/01/2016" "16/02/2016" "16/03/2016"
-##  [71] "16/04/2016" "16/05/2016" "16/06/2016" "16/07/2016" "16/08/2016"
-##  [76] "16/10/2016" "16/11/2016" "17/02/2016" "17/03/2016" "17/04/2016"
-##  [81] "17/05/2016" "17/06/2016" "17/07/2016" "17/08/2016" "17/10/2016"
-##  [86] "17/11/2016" "18/01/2016" "18/02/2016" "18/03/2016" "18/04/2016"
-##  [91] "18/05/2016" "18/06/2016" "18/07/2016" "18/08/2016" "18/10/2016"
-##  [96] "18/11/2016" "19/01/2016" "19/02/2016" "19/03/2016" "19/04/2016"
-## [101] "19/05/2016" "19/06/2016" "19/07/2016" "19/08/2016" "19/09/2016"
-## [106] "19/10/2016" "19/11/2016" "2/02/2016"  "2/04/2016"  "2/05/2016" 
-## [111] "2/06/2016"  "2/07/2016"  "2/08/2016"  "2/09/2016"  "2/10/2016" 
-## [116] "2/11/2016"  "20/01/2016" "20/02/2016" "20/03/2016" "20/04/2016"
-## [121] "20/05/2016" "20/06/2016" "20/07/2016" "20/08/2016" "20/09/2016"
-## [126] "20/10/2016" "20/11/2016" "21/01/2016" "21/02/2016" "21/04/2016"
-## [131] "21/05/2016" "21/06/2016" "21/07/2016" "21/08/2016" "21/09/2016"
-## [136] "21/10/2016" "22/01/2016" "22/02/2016" "22/04/2016" "22/05/2016"
-## [141] "22/06/2016" "22/07/2016" "22/08/2016" "22/09/2016" "22/10/2016"
-## [146] "23/01/2016" "23/02/2016" "23/03/2016" "23/04/2016" "23/05/2016"
-## [151] "23/06/2016" "23/07/2016" "23/08/2016" "23/09/2016" "23/10/2016"
-## [156] "24/01/2016" "24/02/2016" "24/03/2016" "24/04/2016" "24/05/2016"
-## [161] "24/06/2016" "24/07/2016" "24/08/2016" "24/09/2016" "24/10/2016"
-## [166] "25/01/2016" "25/02/2016" "25/03/2016" "25/04/2016" "25/05/2016"
-## [171] "25/06/2016" "25/07/2016" "25/08/2016" "25/09/2016" "25/10/2016"
-## [176] "26/01/2016" "26/02/2016" "26/03/2016" "26/04/2016" "26/05/2016"
-## [181] "26/07/2016" "26/08/2016" "26/09/2016" "26/10/2016" "27/01/2016"
-## [186] "27/02/2016" "27/03/2016" "27/04/2016" "27/05/2016" "27/06/2016"
-## [191] "27/07/2016" "27/08/2016" "27/09/2016" "27/10/2016" "28/01/2016"
-## [196] "28/02/2016" "28/03/2016" "28/04/2016" "28/05/2016" "28/06/2016"
-## [201] "28/07/2016" "28/09/2016" "28/10/2016" "29/01/2016" "29/03/2016"
-## [206] "29/04/2016" "29/05/2016" "29/06/2016" "29/07/2016" "29/08/2016"
-## [211] "29/09/2016" "29/10/2016" "3/02/2016"  "3/04/2016"  "3/05/2016" 
-## [216] "3/06/2016"  "3/07/2016"  "3/08/2016"  "3/09/2016"  "3/10/2016" 
-## [221] "3/11/2016"  "30/03/2016" "30/04/2016" "30/06/2016" "30/07/2016"
-## [226] "30/08/2016" "30/09/2016" "30/10/2016" "31/01/2016" "31/03/2016"
-## [231] "31/07/2016" "31/08/2016" "31/10/2016" "4/01/2016"  "4/02/2016" 
-## [236] "4/04/2016"  "4/05/2016"  "4/07/2016"  "4/08/2016"  "4/09/2016" 
-## [241] "4/10/2016"  "4/11/2016"  "5/01/2016"  "5/02/2016"  "5/04/2016" 
-## [246] "5/05/2016"  "5/06/2016"  "5/07/2016"  "5/08/2016"  "5/09/2016" 
-## [251] "5/10/2016"  "5/11/2016"  "6/01/2016"  "6/02/2016"  "6/04/2016" 
-## [256] "6/05/2016"  "6/06/2016"  "6/07/2016"  "6/08/2016"  "6/09/2016" 
-## [261] "6/10/2016"  "6/11/2016"  "7/01/2016"  "7/02/2016"  "7/04/2016" 
-## [266] "7/05/2016"  "7/06/2016"  "7/08/2016"  "7/09/2016"  "7/10/2016" 
-## [271] "8/01/2016"  "8/02/2016"  "8/04/2016"  "8/05/2016"  "8/06/2016" 
-## [276] "8/07/2016"  "8/09/2016"  "8/10/2016"  "9/01/2016"  "9/02/2016" 
-## [281] "9/04/2016"  "9/05/2016"  "9/06/2016"  "9/09/2016"  "9/10/2016" 
-## Press &lt;RETURN&gt; to continue: [1] "ATP250"       "ATP500"       "Grand Slam"   "Masters 1000"
-## [5] "Masters Cup" 
-## Press &lt;RETURN&gt; to continue: [1] "Indoor"  "Outdoor"
-## Press &lt;RETURN&gt; to continue: [1] "Clay"  "Grass" "Hard" 
-## Press &lt;RETURN&gt; to continue: [1] "1st Round"     "2nd Round"     "3rd Round"     "4th Round"    
-## [5] "Quarterfinals" "Round Robin"   "Semifinals"    "The Final"    
-## Press &lt;RETURN&gt; to continue: [1] 3 5
-## Press &lt;RETURN&gt; to continue:   [1] "Albot R."            "Almagro N."          "Anderson K."        
-##   [4] "Andujar P."          "Arnaboldi A."        "Baghdatis M."       
-##   [7] "Bagnis F."           "Baker B."            "Barton M."          
-##  [10] "Basic M."            "Basilashvili N."     "Bautista Agut R."   
-##  [13] "Bautista R."         "Becker B."           "Bedene A."          
-##  [16] "Bellucci T."         "Bemelmans R."        "Benneteau J."       
-##  [19] "Berankis R."         "Berdych T."          "Berlocq C."         
-##  [22] "Berrer M."           "Bolelli S."          "Bourgue M."         
-##  [25] "Brands D."           "Brown D."            "Bublik A."          
-##  [28] "Cacic N."            "Carballes Baena R."  "Carreno Busta P."   
-##  [31] "Carreno-Busta P."    "Cecchinato M."       "Cervantes I."       
-##  [34] "Chardy J."           "Chiudinelli M."      "Chung H."           
-##  [37] "Cilic M."            "Copil M."            "Coric B."           
-##  [40] "Cuevas P."           "Dancevic F."         "Daniel T."          
-##  [43] "Darcis S."           "De Bakker T."        "De Schepper K."     
-##  [46] "Del Potro J.M."      "Delbonis F."         "Diez S."            
-##  [49] "Dimitrov G."         "Djokovic N."         "Dodig I."           
-##  [52] "Dolgopolov O."       "Donaldson J."        "Donskoy E."         
-##  [55] "Duckworth J."        "Dutra Silva R."      "Dzumhur D."         
-##  [58] "Edmund K."           "Elias G."            "Escobedo E."        
-##  [61] "Estrella Burgos V."  "Evans D."            "Fabbiano T."        
-##  [64] "Falla A."            "Federer R."          "Ferrer D."          
-##  [67] "Fognini F."          "Fratangelo B."       "Fritz T."           
-##  [70] "Fucsovics M."        "Gabashvili T."       "Garcia-Lopez G."    
-##  [73] "Gasquet R."          "Giannessi A."        "Gimeno-Traver D."   
-##  [76] "Giraldo S."          "Goffin D."           "Gojowczyk P."       
-##  [79] "Gonzalez M."         "Granollers M."       "Groth S."           
-##  [82] "Gulbis E."           "Haase R."            "Halys Q."           
-##  [85] "Harrison R."         "Hemery C."           "Herbert P.H"        
-##  [88] "Herbert P.H."        "Hewitt L."           "Isner J."           
-##  [91] "Istomin D."          "Ito T."              "Jasika O."          
-##  [94] "Jaziri M."           "Johnson S."          "Kamke T."           
-##  [97] "Karlovic I."         "Khachanov K."        "Kicker N."          
-## [100] "Klizan M."           "Kohlschreiber P."    "Kovalik J."         
-## [103] "Kozlov S."           "Krajicek A."         "Krajinovic F."      
-## [106] "Kravchuk K."         "Kudla D."            "Kukushkin M."       
-## [109] "Kuznetsov An."       "Kyrgios N."          "Laaksonen H."       
-## [112] "Lacko L."            "Lajovic D."          "Lamasine T."        
-## [115] "Lopez F."            "Lorenzi P."          "Lu Y.H."            
-## [118] "Mahut N."            "Mannarino A."        "Marchenko I."       
-## [121] "Martin A."           "Mathieu P.H."        "Mayer F."           
-## [124] "Mayer L."            "Medvedev D."         "Mektic N."          
-## [127] "Melzer G."           "Melzer J."           "Mertl J."           
-## [130] "Millman J."          "Millot V."           "Monaco J."          
-## [133] "Monfils G."          "Montanes A."         "Monteiro T."        
-## [136] "Muller G."           "Munoz De La Nava D." "Munoz-De La Nava D."
-## [139] "Murray A."           "Nadal R."            "Nishikori K."       
-## [142] "Nishioka Y."         "Novikov D."          "Olivo R."           
-## [145] "Opelka R."           "Paire B."            "Paul T."            
-## [148] "Pavic A."            "Pavlasek A."         "Pella G."           
-## [151] "Polansky P."         "Pospisil V."         "Pouille L."         
-## [154] "Querrey S."          "Ram R."              "Ramanathan R."      
-## [157] "Ramos-Vinolas A."    "Raonic M."           "Robert S."          
-## [160] "Robredo T."          "Roger-Vasselin E."   "Rola B."            
-## [163] "Rosol L."            "Rubin N."            "Rublev A."          
-## [166] "Sarkissian A."       "Satral J."           "Schwartzman D."     
-## [169] "Sela D."             "Seppi A."            "Shapovalov D."      
-## [172] "Sidorenko A."        "Sijsling I."         "Simon G."           
-## [175] "Skugor F."           "Smith J.P."          "Smyczek T."         
-## [178] "Sock J."             "Soderlund C."        "Sousa J."           
-## [181] "Souza J."            "Stakhovsky S."       "Stepanek R."        
-## [184] "Struff J.L."         "Sugita Y."           "Thiem D."           
-## [187] "Thompson J."         "Tiafoe F."           "Tipsarevic J."      
-## [190] "Tomic B."            "Troicki V."          "Trungelliti M."     
-## [193] "Tsonga J.W."         "Tursunov D."         "Ungur A."           
-## [196] "Vanni L."            "Verdasco F."         "Vesely J."          
-## [199] "Wawrinka S."         "Wessels L."          "Whittington A."     
-## [202] "Willis M."           "Wu D."               "Ymer E."            
-## [205] "Ymer M."             "Young D."            "Youzhny M."         
-## [208] "Zeballos H."         "Zemlja G."           "Zopp J."            
-## [211] "Zverev A."           "Zverev M."          
-## Press &lt;RETURN&gt; to continue:   [1] "Ahouda A."           "Albot R."            "Almagro N."         
-##   [4] "Anderson K."         "Anderson O."         "Andreozzi G."       
-##   [7] "Andujar P."          "Arguello F."         "Arnaboldi A."       
-##  [10] "Arvidsson I."        "Bachinger M."        "Baghdatis M."       
-##  [13] "Bagnis F."           "Baker B."            "Barrere G."         
-##  [16] "Barton M."           "Basic M."            "Basilashvili N."    
-##  [19] "Bautista Agut R."    "Bautista R."         "Beck A."            
-##  [22] "Becker B."           "Bedene A."           "Bellier A."         
-##  [25] "Bellucci T."         "Bemelmans R."        "Benneteau J."       
-##  [28] "Berankis R."         "Berdych T."          "Berlocq C."         
-##  [31] "Berrer M."           "Bhambri Y."          "Bolelli S."         
-##  [34] "Bourgue M."          "Brands D."           "Broady L."          
-##  [37] "Brown D."            "Bublik A."           "Cachin P."          
-##  [40] "Cacic N."            "Carballes Baena R."  "Carreno Busta P."   
-##  [43] "Carreno-Busta P."    "Caruso S."           "Cecchinato M."      
-##  [46] "Cervantes I."        "Chardy J."           "Chiudinelli M."     
-##  [49] "Choinski J."         "Chung H."            "Cilic M."           
-##  [52] "Clezar G."           "Copil M."            "Coric B."           
-##  [55] "Cuevas P."           "Dancevic F."         "Daniel T."          
-##  [58] "Darcis S."           "De Bakker T."        "De Loore J."        
-##  [61] "De Schepper K."      "Del Potro J.M."      "Delbonis F."        
-##  [64] "Devvarman S."        "Diez S."             "Dimitrov G."        
-##  [67] "Djere L."            "Djokovic N."         "Dodig I."           
-##  [70] "Dolgopolov O."       "Donaldson J."        "Donskoy E."         
-##  [73] "Duckworth J."        "Dutra Silva R."      "Dzumhur D."         
-##  [76] "Ebden M."            "Edmund K."           "El Amrani R."       
-##  [79] "Elias G."            "Escobar G."          "Escobedo E."        
-##  [82] "Estrella Burgos V."  "Eubanks C."          "Evans D."           
-##  [85] "Fabbiano T."         "Falla A."            "Federer R."         
-##  [88] "Ferrer D."           "Fognini F."          "Fratangelo B."      
-##  [91] "Fritz T."            "Fucsovics M."        "Gabashvili T."      
-##  [94] "Gaio F."             "Garcia-Lopez G."     "Garin C."           
-##  [97] "Gasquet R."          "Ghem A."             "Giannessi A."       
-## [100] "Gimeno-Traver D."    "Giraldo S."          "Giustino L."        
-## [103] "Goffin D."           "Gojowczyk P."        "Gomez E."           
-## [106] "Gomez L."            "Gonzalez A."         "Gonzalez M."        
-## [109] "Granollers M."       "Groth S."            "Guez D."            
-## [112] "Gulbis E."           "Haase R."            "Halys Q."           
-## [115] "Hank T."             "Harrison C."         "Harrison R."        
-## [118] "Hemery C."           "Herbert P.H"         "Herbert P.H."       
-## [121] "Hernych J."          "Hewitt L."           "Ilhan M."           
-## [124] "Ilkel C."            "Isner J."            "Istomin D."         
-## [127] "Ito T."              "Ivashka I."          "Janowicz J."        
-## [130] "Jarry N."            "Jasika O."           "Jaziri M."          
-## [133] "Johnson S."          "Kamke T."            "Karatsev A."        
-## [136] "Karlovic I."         "Khachanov K."        "Kicker N."          
-## [139] "Klein B."            "Klizan M."           "Kohlschreiber P."   
-## [142] "Kovalik J."          "Kozlov S."           "Krajicek A."        
-## [145] "Krajinovic F."       "Kravchuk K."         "Kudla D."           
-## [148] "Kudryavtsev A."      "Kukushkin M."        "Kuzmanov D."        
-## [151] "Kuznetsov Al."       "Kuznetsov An."       "Kyrgios N."         
-## [154] "Laaksonen H."        "Lacko L."            "Lajovic D."         
-## [157] "Lamasine T."         "Lapentti G."         "Lazov A."           
-## [160] "Li Z."               "Lindell C."          "Linzer M."          
-## [163] "Lopez F."            "Lopez-Perez E."      "Lorenzi P."         
-## [166] "Lu Y.H."             "Maden Y."            "Mahut N."           
-## [169] "Mannarino A."        "Marchenko I."        "Marterer M."        
-## [172] "Marti Y."            "Martin A."           "Martin F."          
-## [175] "Mathieu P.H."        "Mayer F."            "Mayer L."           
-## [178] "Mcdonald M."         "Mcgee J."            "Medvedev D."        
-## [181] "Mektic N."           "Melzer G."           "Melzer J."          
-## [184] "Mertl J."            "Millman J."          "Millot V."          
-## [187] "Mitchell B."         "Mmoh M."             "Moeller M."         
-## [190] "Monaco J."           "Monfils G."          "Montanes A."        
-## [193] "Monteiro T."         "Moriya H."           "Muller G."          
-## [196] "Munar J."            "Munoz De La Nava D." "Munoz-De La Nava D."
-## [199] "Murray A."           "Myneni S."           "Nadal R."           
-## [202] "Nikles J."           "Nishikori K."        "Nishioka Y."        
-## [205] "Novak D."            "Novikov D."          "Olivetti A."        
-## [208] "Olivo R."            "Opelka R."           "Ortega-Olmedo R."   
-## [211] "Ouahab L."           "Paire B."            "Patino L."          
-## [214] "Paul T."             "Pavic A."            "Pavlasek A."        
-## [217] "Pella G."            "Polansky P."         "Pospisil V."        
-## [220] "Pouille L."          "Przysiezny M."       "Querrey S."         
-## [223] "Ram R."              "Ramanathan R."       "Ramos-Vinolas A."   
-## [226] "Raonic M."           "Riba P."             "Robert S."          
-## [229] "Robredo T."          "Roger-Vasselin E."   "Rola B."            
-## [232] "Rosol L."            "Rubin N."            "Rublev A."          
-## [235] "Ruud C."             "Samper-Montana J."   "Santillan A."       
-## [238] "Sarkissian A."       "Satral J."           "Saville L."         
-## [241] "Schwartzman D."      "Sela D."             "Seppi A."           
-## [244] "Serdarusic N."       "Setkic A."           "Shapovalov D."      
-## [247] "Sidorenko A."        "Sijsling I."         "Silva F."           
-## [250] "Simon G."            "Simonsson F."        "Skugor F."          
-## [253] "Smith A."            "Smith J.P."          "Smyczek T."         
-## [256] "Sock J."             "Soderlund C."        "Soeda G."           
-## [259] "Sonego L."           "Sousa J."            "Sousa P."           
-## [262] "Souza J."            "Stakhovsky S."       "Stebe C.M."         
-## [265] "Stepanek R."         "Struff J.L."         "Sugita Y."          
-## [268] "Tearney F."          "Thiem D."            "Thompson J."        
-## [271] "Tiafoe F."           "Tipsarevic J."       "Tomic B."           
-## [274] "Troicki V."          "Trungelliti M."      "Tsonga J.W."        
-## [277] "Tursunov D."         "Ungur A."            "Van Rijthoven T."   
-## [280] "Vanni L."            "Velotti A."          "Venus M."           
-## [283] "Verdasco F."         "Vesely J."           "Volandri F."        
-## [286] "Ward A."             "Ward J."             "Wawrinka S."        
-## [289] "Weintraub A."        "Wessels L."          "Whittington A."     
-## [292] "Willis M."           "Wu D."               "Ymer E."            
-## [295] "Ymer M."             "Young D."            "Youzhny M."         
-## [298] "Zayid M. S."         "Zeballos H."         "Zemlja G."          
-## [301] "Zhang Ze"            "Zopp J."             "Zverev A."          
-## [304] "Zverev M."          
-## Press &lt;RETURN&gt; to continue:
-```
-
 ---
 
-# Type Conversion
+# Practice: Inspect Variables
 
-- Based on our inspection, several type conversions would improve our data. 
-
-- One is to convert `Best.of` from character to numeric. 
-
-- The second is to make `Round` a factor. 
-
----
-
-# Conversion: Character to Numeric
-
-- The `Best.of` takes either `3` or `5`, which we can convert directly using `as.numeric`.
-
-- To `mutate` or change/create a variable we will use the `dplyr` package.
-
-
-```r
-library(dplyr) # dplyr for data manipulation
-
-atp_odds &lt;- atp_odds %&gt;%
-  dplyr::mutate(
-    Best.of = as.numeric(Best.of)
-  )
-```
+Complete the inspection step in the previous slide. Determine:
 
 &lt;br&gt;
 
-*Note:* `%&gt;%` is a piping operator
+1. What variables does the dataset contain?
+
+2. Which variables are relevant to measuring event surprising event outcomes by player and year?
+
+3. Are there any issues with those variables we need to address?
 
 ---
 
-# Conversion: Factor
+# Solution: Inspect Variables
 
-For `Round`, we want to make a ordered factor, which will allow us to use `Round` as a numeric when needed without losing it's descriptive labels.
+- The dataset contains winner and loser info for each match along with the pre-match Odds by several different bookmakers
 
+- The 'Date', 'Winner', and one or more of the odds will be used to measure a player's event performance
 
-```r
-# Define round order
-rounds &lt;- c("Round Robin", "1st Round", 
-            "2nd Round", "3rd Round", "4th Round", 
-            "Quarterfinals", "Semifinals", "The Final") 
+- We need to create a 'Year' variable, check for duplicates/variants in spelling among Winner names, create a 'surprise score' for each win, and filter out 'Retirements' matches
 
+--
 
-atp_odds &lt;- atp_odds %&gt;%
-  dplyr::mutate(
-    Round = factor(Round,
-		levels = rounds,
-		order = T
-))
-```
+&lt;br&gt;
 
-
----
-
-# Non-ASCII Characters
-
-
-- Another issue our inspection revealed were non-[ASCII](https://en.wikipedia.org/wiki/ASCII) characters in the `Tournament` variable.
-
-- We could identify this issue because of Hexadecimal characters like `\x99` and `\xd5` in the variable.
-
-
-- Having these characters not only makes the characters unreadable, it also prevents us from using some string manipulation functions like `grep`.
-
----
-
-# Handling Non-ASCII
-
-We can use the `iconv` function to force the variable into ASCII and remove any non-ASCII by using the `sub` argument.
-
-
-```r
-atp_odds &lt;- atp_odds %&gt;%
-  dplyr::mutate(
-    Tournament =  iconv(Tournament, "latin1", "ASCII", sub = "")
-  )
-```
-
+&lt;h3 style="color:#f2ca95;"&gt;Let's get started...&lt;/h3&gt;
 
 ---
 
@@ -952,7 +750,7 @@ atp_odds &lt;- atp_odds %&gt;%
 
 * `lubridate` has conversion functions that are named according to the format of our input. 
 
-<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<table class='gmisc_table' style='border-collapse: collapse; text-align:center;' >
 <thead>
 <tr>
 <th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Function</th>
@@ -981,36 +779,103 @@ atp_odds &lt;- atp_odds %&gt;%
 
 ---
 
-# Question
+# Convert Date and Make Year
 
-Look at `Date` in the `atp_odds` dataset. What is the appropriate conversion function for these dates?
-
---
-
-*Answer:* `dmy`
-
----
-
-
-# Date Conversion
-
-Here we convert the `Date` and use the `month` and `year` functions to create variables for `Month` and `Year`.
+In this code we will use `lubridate` and `dplyr` to convert the `Date` variable and create the variable `Year`. 
 
 
 ```r
-library(lubridate) # Load lubridate
-
-atp_odds &lt;- atp_odds %&gt;%
-    dplyr::mutate(
-      Date =  dmy(Date), # Conversion
-      Year = year(Date), # Numeric year
-      Month = month(Date)
-    )
+library(dplyr) # dplyr for data manipulation
+library(lubridate) # date manipulation
 ```
+
+```
+## 
+## Attaching package: 'lubridate'
+```
+
+```
+## The following object is masked from 'package:base':
+## 
+##     date
+```
+
+```r
+data &lt;- data %&gt;%
+	dplyr::mutate(
+		Date  = dmy(Date),
+		Year = year(Date)
+	)
+```
+
+&lt;br&gt;
+
+*Note:* `%&gt;%` is a piping operator
+
+---
+
+# Surprise Score
+
+.left[
+** What should define a surprising event performance? **
+
+- A string of big upsets is one definition
+
+- We can use the bookmaker odds to measure what a player was expected to do and compare that against their actual wins
+
+- A more surprising result is one that exceeds expectations
+
+- The sum of this 'surprise score' over all of a player's wins will be their event 'Surprise Score'
+]
+
+.right[
+![](inspector_gadget.gif)
+]
+
+---
+
+# Which Odds?
+
+There are several odds to choose from. Without knowing more about the bookmakers, we will choose one of the odds that is most complete across matches. To do this, we need to check for missing values.
+
+
+```r
+data %&gt;%
+	select(B365W:AvgL) %&gt;%
+	summarise_all(
+		funs(sum(is.na(.)))
+	)
+```
+
+```
+##   B365W B365L EXW EXL LBW LBL PSW PSL MaxW MaxL AvgW AvgL
+## 1     0     0   1   1   1   1   1   1    0    0    0    0
+```
+
+
+---
+
+# Create Suprise Score
+
+We will use the `B365W` odds for the winner and do the simple inversion to estimate the expected win chances for the player.
+
+
+```r
+data &lt;- data %&gt;% 
+	dplyr::mutate(
+		SurpriseScore = 1 - 1 / as.numeric( B365W)
+	)	
+```
+
+.footnote[
+[1] Remember we needed to convert to numeric before making this calculation
+]
 
 ---
 
 # Cleaning Names
+
+- Before we can summarise results by `Winner` we need to check the validity of the names
 
 - One of the most troublesome issues with sports data are inconsistent naming of players. This is a problem when you need to assign performance measures to the same individual, based on their name.
 
@@ -1051,7 +916,7 @@ Here we look for possible inconsistencies in the `Winner` variable using `agrep`
 
 
 ```r
-players &lt;- sort(unique(atp_odds$Winner)) # Get unique players
+players &lt;- sort(unique(as.character(data$Winner))) # Get unique players
 
 approx &lt;- lapply(players, agrep, fixed = T, x = players) 
 # Compare each player against all others
@@ -1060,12 +925,7 @@ players[sapply(approx, length) &gt; 1]
 ```
 
 ```
-##  [1] "Bautista R."         "Carreno Busta P."    "Carreno-Busta P."   
-##  [4] "Herbert P.H"         "Herbert P.H."        "Lopez F."           
-##  [7] "Mayer F."            "Mayer L."            "Melzer G."          
-## [10] "Melzer J."           "Munoz De La Nava D." "Munoz-De La Nava D."
-## [13] "Sousa J."            "Souza J."            "Ymer E."            
-## [16] "Ymer M."             "Zverev A."           "Zverev M."
+## [1] "Bautista R." "Lopez F."    "Zverev A."   "Zverev M."
 ```
 
 ```r
@@ -1074,7 +934,57 @@ players[sapply(approx, length) &gt; 1]
 
 ---
 
-# Reshape
+# Practice: Cleaning Names
+
+Based on the results from our inspection in the previous slide, which changes do you think are needed to the `Winner` variable?
+
+--
+
+&lt;br&gt;
+
+_Answer:_
+
+
+```r
+data$Winner[data$Winner == "Bautista Agut R."] &lt;- "Bautista R."
+```
+
+---
+
+# Total Surprise Score
+
+We are now ready to compute a total surprise score for each player and year. Using `summarise`, find the top 10 most surprising performances in the past 3 years.
+
+--
+
+_Answer:_
+
+```{}
+summarise_wins &lt;- data %&gt;%
+	filter(Comment != "Retired") %&gt;% # Remember to remove retirements
+	group_by(Year, Winner) %&gt;%
+	dplyr::summarise(
+		TotalSurpriseScore = sum(SurpriseScore)
+	)
+
+summarise_wins[order(summarise_wins$TotalSurpriseScore, decreasing = T),][1:10,]
+```
+
+---
+
+# What About Losses?
+
+--
+
+- Suppose we had wanted a score based on wins and losses, what would we need to do this?
+
+--
+
+- We would need to switch to a _long_ format which means reshaping our data
+
+---
+
+# Reshaping Data
 
 In addition to transforming individual variables, we often will want to reshape our data from wide to long or long to wide formats.
 
@@ -1122,131 +1032,37 @@ The values that will be inserted into those columns is indicated with the `value
 
 ---
 
-# Example: Reshaping
+# Practice: Reshaping
 
-Create a long version of the `atp_odds` data that stacks the `Winner` and `Loser` as the variable `player`.
+Use the `tidyr` package to create a long format of our data that groups `Winner` and `Loser` into a single `player` column.
 
+--
 
-```r
-atp_odds_long &lt;- atp_odds %&gt;%
-  gather("Result", "Player", Winner, Loser)
-
-head(atp_odds_long[,c("Date", "Result", "Player")])
-```
-
-```
-##         Date Result      Player
-## 1 2016-01-04 Winner Dimitrov G.
-## 2 2016-01-04 Winner    Kudla D.
-## 3 2016-01-04 Winner    Kamke T.
-## 4 2016-01-04 Winner    Chung H.
-## 5 2016-01-05 Winner   Goffin D.
-## 6 2016-01-05 Winner  Troicki V.
-```
-
----
-
-# Practice: 2016 ATP Matches
-
-Practice what we've learned by looking at the `atp_matches` data set that includes results and service stats for ATP 2016 matches.
-
-1. Inspect each variable and note any peculiarities
-
-2. Create a date object for the tournament date
-
-3. Create a long format by stacking winners and losers
-
-4. Search for any inconsistencies with the naming of players
-
-
----
-
-# Solution: Variable Inspection
-
-
-
+_Answer:_
 
 
 ```r
-data(atp_2016) # dataset from WOMBATsport
-
-classes &lt;- apply(atp_matches, 2, class)
-
-for(name in names(classes)){
-	print(sort(unique(atp_matches[,name])))
-	ask()
-}
+data &lt;- data %&gt;%
+  gather("Outcome", "Player", Winner, Loser)
 ```
 
----
-
-# Solution: Peculiarities
-
-1. There are character variables (minutes, draw_size, w_1stWon to l_svpt) that need to be converted to numeric
-
-2. `tourney_name`, `surface`, `round`, `winner_name` and `loser_name` each have blank values
-
-3. Some of `minutes` and stats have a value of 0
-
----
-
-# Solution: Date Conversion
-
+```
+## Warning: attributes are not identical across measure variables; they will
+## be dropped
+```
 
 ```r
-atp_matches &lt;- atp_matches %&gt;%
-	dplyr::mutate(
-		tourney_date = ymd(tourney_date)
-	)
-
-atp_matches$tourney_date[1:10]
+head(data[,c("Date", "Outcome", "Player")])
 ```
 
 ```
-##  [1] "2016-01-04" "2016-01-04" "2016-01-04" "2016-01-04" "2016-01-04"
-##  [6] "2016-01-04" "2016-01-04" "2016-01-04" "2016-01-04" "2016-01-04"
-```
-
----
-
-# Solution: Reshaping
-
-
-```r
-atp_matches_long &lt;- atp_matches %&gt;%
-  gather("result", "player", winner_name, loser_name)
-
-head(atp_matches_long[,c("tourney_date", "result", "player")])
-```
-
-```
-##   tourney_date      result        player
-## 1   2016-01-04 winner_name  Milos Raonic
-## 2   2016-01-04 winner_name Roger Federer
-## 3   2016-01-04 winner_name  Milos Raonic
-## 4   2016-01-04 winner_name Roger Federer
-## 5   2016-01-04 winner_name Dominic Thiem
-## 6   2016-01-04 winner_name  Milos Raonic
-```
-
----
-
-# Solution: Check for Naming Inconsistencies
-
-
-
-```r
-players &lt;- sort(unique(atp_matches_long$player))
-players &lt;- players[players != ""] # Remove empty cases
-
-approx &lt;- lapply(players, agrep, fixed = T, x = players)
-
-players[sapply(approx, length) &gt; 1]
-```
-
-```
-## [1] "Alexander Ward" "Dennis Novak"   "Joao Sousa"     "Joao Souza"    
-## [5] "Ryan Harrison"  "Ti Chen"
+##         Date Outcome       Player
+## 1 2015-01-19  Winner  Berankis R.
+## 2 2015-01-19  Winner  Dimitrov G.
+## 3 2015-01-19  Winner  Anderson K.
+## 4 2015-01-19  Winner    Chardy J.
+## 5 2015-01-19  Winner     Lacko L.
+## 6 2015-01-19  Winner Matosevic M.
 ```
 
 ---
